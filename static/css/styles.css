@@ -3,23 +3,22 @@
   border: 0px;
   margin: 0px;
   padding: 0px;
-  color: white;
+  color: black;
   font-size: 16px;
   font-weight: 100;
   line-height: 20px; }
 
   html, body {
-    background-color: black; }
+    width: 100%;
+    height: auto;
+    min-height: 100% !important;
+    background-color: white; }
 
     html {
-      width: 100%;
-      height: auto;
-      min-height: 100%;
       border: 1px solid blue; }
 
       body {
         border: 1px solid red;
-        height: 1000px;
         display: flex;
         flex-flow: column nowrap;
         align-items: center; }
@@ -33,14 +32,53 @@
             main {
               border: 1px solid orange; }
 
-              footer {
-                border: 1px solid fuchsia;
-                position: fixed;
-                bottom: 0;
-                width: 400px; }
+              ul {
+                list-style-type: none; }
 
-                ul {
-                  list-style-type: none; }
+                a {
+                  text-decoration: none; }
 
-                  a {
-                    text-decoration: none; }
+footer {
+  position: fixed;
+  bottom: 0; }
+
+  #nav_ul {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center; }
+
+    .nav_li {
+      width: fit-content; }
+
+      .nav_button {
+        font-size: 20px;
+        line-height: 30px;
+        text-align: center;
+        width: 32px;
+        height: 32px;
+        padding: 1px;
+        margin: 1px;
+        border: 1px solid gray;
+        border-radius: 20%; }
+
+        #login_ul {
+          border: 1px solid gray;
+          border-radius: 30px 30px 0 0;
+          border-bottom: none;
+          width: 300px;
+          padding: 6px 0;
+          display: flex;
+          flex-flow: row nowrap;
+          justify-content: center; }
+
+          .login_li, .login_li > a {
+            font-size: 12px; }
+
+            .login_li {
+              padding: 0 6px; }
+
+
+
+
+
+

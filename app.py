@@ -14,14 +14,16 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     # SESSION_COOKIE_SECURE=True,
     PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=1),
-    USE_X_SENDFILE=True,
     TEMPLATES_AUTO_RELOAD=True
 )
-
-# scss (paths are relative to /static directory)
+# scss, paths are relative to /static directory
 assets = Environment(app)
 assets.url = app.static_url_path
-scss = Bundle("../scss/main.scss", filters='pyscss', output="css/styles.css")
+scss = Bundle(
+    "../scss/main.scss", "../scss/footer.scss", "../scss/index.scss",
+    "../scss/login.scss", "../scss/board.scss",
+    filters='pyscss', output="css/styles.css"
+)
 assets.register('styles', scss)
 
 

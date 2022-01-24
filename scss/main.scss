@@ -1,5 +1,5 @@
-$color_text_normal: white;
-$color_background: black;
+$color_text_normal: black;
+$color_background: white;
 $with_main: 800px;
 
 * {
@@ -9,24 +9,22 @@ $with_main: 800px;
   padding: 0px;
 
   color: $color_text_normal;
-  //font-family: 'Pelagiad', 'Times New Roman', serif;
+  //font-family: 'Times New Roman', serif;
   font-size: 16px;
   font-weight: 100;
   line-height: 20px;
 }
 html, body {
+  width: 100%;
+  height: auto;
+  min-height: 100% !important;
   background-color: $color_background;
 }
 html {
-  width: 100%;
-  height: auto;
-  min-height: 100%;
   border: 1px solid blue;
 }
 body {
   border: 1px solid red;
-  height: 1000px;
-
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
@@ -44,20 +42,9 @@ main {
   border: 1px solid orange;
 }
 
-footer {
-  border: 1px solid fuchsia;
-  position: fixed;
-  bottom: 0;
-  width: 400px;
-}
-
 ul {
   list-style-type: none
 }
 a {
   text-decoration: none;
 }
-
-@import "index";
-@import "board";
-@import "login";
