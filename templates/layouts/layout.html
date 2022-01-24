@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='initial-scale=1, width=device-width'>
+
+    <link href='/static/images/favicon.ico' rel='icon'>
+    {% assets "styles" %}<link href="{{ ASSET_URL }}" rel='stylesheet' type='text/css'>{% endassets %}
+
+
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+
+  <body>
+
+    <header>
+      <h1>{% block header %}{% endblock %}</h1>
+      <p>{% block description %}{% endblock %}</p>
+    </header>
+
+    {% block main %}{% endblock %}
+
+    {% block footer %}{% endblock %}
+
+  </body>
+</html>
