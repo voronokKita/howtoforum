@@ -1,6 +1,10 @@
 $color_text_normal: black;
 $color_background: white;
-$with_main: 800px;
+$color_header: mintcream;
+$with_main: 1000px;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap');
 
 * {
   box-sizing: border-box;
@@ -9,10 +13,10 @@ $with_main: 800px;
   padding: 0px;
 
   color: $color_text_normal;
-  //font-family: 'Times New Roman', serif;
+  font-family: 'Roboto', 'Arial', sans-serif;
   font-size: 16px;
   font-weight: 100;
-  line-height: 20px;
+  line-height: 22px;
 }
 html, body {
   width: 100%;
@@ -20,31 +24,36 @@ html, body {
   min-height: 100% !important;
   background-color: $color_background;
 }
-html {
-  border: 1px solid blue;
-}
 body {
-  border: 1px solid red;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
 }
 
-header {
-  border: 1px solid green;
-}
-
 header, main {
-  width: $with_main;
+  //border: 1px solid rgb(202, 132, 199);
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  max-width: $with_main;
+  //padding: 6px;
 }
+#header_text {
+  padding: 4px 16px 4px 8px;
+  border: 1px solid $color_header;
+  border-radius: 16%;
+  background-color: $color_header;
+}
+header {padding: 8px 0;}
+main {padding: 6px 12px;}
 
-main {
-  border: 1px solid orange;
-}
-
-ul {
-  list-style-type: none
-}
-a {
-  text-decoration: none;
-}
+img {max-width: 100%; height: auto;}
+ul {list-style-type: none;}
+a {text-decoration: none;}
+h6 {font-size: 17px;}
+h5 {font-size: 18px;}
+h4 {font-size: 19px;}
+h3 {font-size: 20px;}
+h2 {font-size: 21px;}
+h1 {font-size: 22px;}
+h1, h2, h3, h4, h5, h6 {font-family: 'Raleway', sans-serif;}

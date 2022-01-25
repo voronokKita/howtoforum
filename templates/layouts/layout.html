@@ -2,11 +2,14 @@
 <html lang='en'>
   <head>
     <meta charset='utf-8'>
+    <meta name='referrer' content='strict-origin'>
     <meta name='viewport' content='initial-scale=1, width=device-width'>
+    <meta name='description' content="My first web-server">
+    <meta name='keywords' content="Web, Server, Apache, Flask, SQL, Forum">
+    <meta name='author' content="Kira Voronok">
 
     <link href='/static/images/favicon.ico' rel='icon'>
     {% assets "styles" %}<link href="{{ ASSET_URL }}" rel='stylesheet' type='text/css'>{% endassets %}
-
 
     <title>{% block title %}{% endblock %}</title>
   </head>
@@ -14,8 +17,10 @@
   <body>
 
     <header>
-      <h1>{% block header %}{% endblock %}</h1>
-      <p>{% block description %}{% endblock %}</p>
+      <div id='header_text'>
+        <h1>{% block header %}{% endblock %}</h1>
+        <p>{% block description %}{% endblock %}</p>
+      </div>
     </header>
 
     {% block main %}{% endblock %}

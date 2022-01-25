@@ -1,42 +1,75 @@
-* {
-  box-sizing: border-box;
-  border: 0px;
-  margin: 0px;
-  padding: 0px;
-  color: black;
-  font-size: 16px;
-  font-weight: 100;
-  line-height: 20px; }
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap'); 
+  * {
+    box-sizing: border-box;
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+    color: black;
+    font-family: 'Roboto', 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: 100;
+    line-height: 22px; }
 
-  html, body {
-    width: 100%;
-    height: auto;
-    min-height: 100% !important;
-    background-color: white; }
-
-    html {
-      border: 1px solid blue; }
+    html, body {
+      width: 100%;
+      height: auto;
+      min-height: 100% !important;
+      background-color: white; }
 
       body {
-        border: 1px solid red;
         display: flex;
         flex-flow: column nowrap;
         align-items: center; }
 
-        header {
-          border: 1px solid green; }
+        header, main {
+          display: flex;
+          flex-flow: row nowrap;
+          width: 100%;
+          max-width: 1000px; }
 
-          header, main {
-            width: 800px; }
+          #header_text {
+            padding: 4px 16px 4px 8px;
+            border: 1px solid mintcream;
+            border-radius: 16%;
+            background-color: mintcream; }
 
-            main {
-              border: 1px solid orange; }
+            header {
+              padding: 8px 0; }
 
-              ul {
-                list-style-type: none; }
+              main {
+                padding: 6px 12px; }
 
-                a {
-                  text-decoration: none; }
+                img {
+                  max-width: 100%;
+                  height: auto; }
+
+                  ul {
+                    list-style-type: none; }
+
+                    a {
+                      text-decoration: none; }
+
+                      h6 {
+                        font-size: 17px; }
+
+                        h5 {
+                          font-size: 18px; }
+
+                          h4 {
+                            font-size: 19px; }
+
+                            h3 {
+                              font-size: 20px; }
+
+                              h2 {
+                                font-size: 21px; }
+
+                                h1 {
+                                  font-size: 22px; }
+
+                                  h1, h2, h3, h4, h5, h6 {
+                                    font-family: 'Raleway', sans-serif; }
 
 footer {
   position: fixed;
@@ -52,32 +85,54 @@ footer {
 
       .nav_button {
         font-size: 20px;
+        font-weight: 500;
         line-height: 30px;
         text-align: center;
         width: 32px;
         height: 32px;
         padding: 1px;
         margin: 1px;
-        border: 1px solid gray;
-        border-radius: 20%; }
+        border: 1px solid lightsteelblue;
+        border-radius: 20%;
+        background-color: lightcyan;
+        color: #2a2a2c; }
 
-        #login_ul {
-          border: 1px solid gray;
-          border-radius: 30px 30px 0 0;
-          border-bottom: none;
-          width: 300px;
-          padding: 6px 0;
-          display: flex;
-          flex-flow: row nowrap;
-          justify-content: center; }
+        .nav_button:hover {
+          color: black;
+          background-color: lightskyblue; }
 
-          .login_li, .login_li > a {
-            font-size: 12px; }
+          #login_ul {
+            display: flex;
+            flex-flow: row nowrap;
+            justify-content: center;
+            width: 300px;
+            padding: 6px 0;
+            border: 1px solid lightsteelblue;
+            border-radius: 30px 30px 0 0;
+            border-bottom: none;
+            background-color: lightcyan; }
 
-            .login_li {
-              padding: 0 6px; }
+            .login_li, .login_li > a {
+              font-size: 12px; }
 
+              .login_li > a:hover {
+                text-decoration: underline; }
 
+                .login_li {
+                  padding: 0 6px; }
+
+#kei {
+  border: 1px solid whitesmoke;
+  border-radius: 1%;
+  padding: 4px; }
+
+  #index_img {
+    display: flex;
+    justify-content: center;
+    width: 100%; }
+
+    #index_main {
+      padding: 0; }
 
 
 

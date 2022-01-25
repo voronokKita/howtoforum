@@ -1,4 +1,6 @@
-$color_footer: gray;
+$color_footer: lightcyan;
+$color_footer_hover: lightskyblue;
+$color_footer_border: lightsteelblue;
 
 footer {
   position: fixed;
@@ -15,30 +17,38 @@ footer {
 }
 .nav_button {
   font-size: 20px;
+  font-weight: 500;
   line-height: 30px;
   text-align: center;
+
   width: 32px;
   height: 32px;
   padding: 1px;
   margin: 1px;
-  border: 1px solid $color_footer;
+
+  border: 1px solid $color_footer_border;
   border-radius: 20%;
+  background-color: $color_footer;
+  color: rgb(42, 42, 44);
+}
+.nav_button:hover {
+  color: black;
+  background-color: $color_footer_hover;
 }
 
 #login_ul {
-  border: 1px solid $color_footer;
-  border-radius: 30px 30px 0 0;
-  border-bottom: none;
-  width: 300px;
-  padding: 6px 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
 
+  width: 300px;
+  padding: 6px 0;
+
+  border: 1px solid $color_footer_border;
+  border-radius: 30px 30px 0 0;
+  border-bottom: none;
+  background-color: $color_footer;
 }
-.login_li, .login_li > a {
-  font-size: 12px;
-}
-.login_li {
-  padding: 0 6px;
-}
+.login_li, .login_li > a {font-size: 12px;}
+.login_li > a:hover {text-decoration: underline;}
+.login_li {padding: 0 6px;}
