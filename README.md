@@ -1,13 +1,13 @@
 # HOWTO Forum, work in progress
 
 My imageboard-like forum on Flask.
-> venv: source "./forum venv/bin/activate"<br>
+> venv: source "./_forum_venv/bin/activate"<br>
 start server: FLASK_APP=app.py FLASK_ENV=development flask run
 
-The goal is to learn the flask + apache-server + SQL deployment.
+The goal is to learn the Flask + Apache-server + SQL deployment.
 
-##### Apache
+#### update one
 
-0. https://httpd.apache.org/docs/
-1. Setting up virtual host
-3. ...
+I ran into trouble with deployment of Flask on Apache. I decided that it isn't worth it to waste time solving them and drop the Apache. Still, I managed to learn basics of Apache and deploy two static sites via virtual hosts.<br>
+I also ran into Pipenv and find it very good.<br>
+Basics chassi for the forum is ready, now going to learn SQL.

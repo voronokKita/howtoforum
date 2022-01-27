@@ -1,4 +1,4 @@
-#!/home/kita/Main/Code/Misc/HowtoForum/_forum_venv/bin/python3
+#!/home/kita/.local/share/virtualenvs/HowtoForum-UEyTZxFO/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
