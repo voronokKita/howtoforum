@@ -1,10 +1,12 @@
 from flask import Flask, url_for, request, render_template, make_response
 from flask_assets import Environment, Bundle
+from flask_sqlalchemy import SQLAlchemy
 from markupsafe import escape
 
 from pprint import pprint
 import secrets
-import datetime
+from datetime import datetime, timedelta, timezone
+import helpers
 
 app = Flask(__name__)
 app.config.update(
@@ -13,8 +15,11 @@ app.config.update(
     SECRET_KEY=secrets.token_hex(),
     SESSION_COOKIE_SAMESITE='Lax',
     # SESSION_COOKIE_SECURE=True,
-    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=1),
-    TEMPLATES_AUTO_RELOAD=True
+    PERMANENT_SESSION_LIFETIME=timedelta(days=1),
+    TEMPLATES_AUTO_RELOAD=True,
+
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
 )
 # scss, paths are relative to /static directory
 assets = Environment(app)
@@ -25,6 +30,48 @@ scss = Bundle(
     filters='pyscss', output="css/styles.css"
 )
 assets.register('styles', scss)
+
+db = SQLAlchemy(app)
+"""
+users, statuses, resourses, posts
+statuses    -> one-to-many ->   users
+users       -> one-to-many ->   posts
+users       -> one-to-many ->   resourses
+resourses   -> one-to-many ->   posts
+Post may have internal relationships:
+head post (thread) and responses (comments),
+comments have an id of their thread (response_in_id)
+and threads have a date of a last comment (updated)
+"""
+
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    login = db.Column(db.Sring(26), unique=True, nullable=False)
+    password = db.Column(db.Sring(100), nullable=False)
+    status = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.DateTime, timezone=True, default=helpers.TIME_NOW, nullable=True)
+
+class Statuses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Sring(20), unique=True, nullable=False)
+
+class Resources(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    resource = db.Column(db.LargeBinary(), nullable=False)
+    user_id = db.Column(db.Sring(26), nullable=True)
+    date = db.Column(db.DateTime, timezone=True, default=helpers.TIME_NOW, nullable=True)
+
+class Posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=True)
+    password = db.Column(db.Sring(30), nullable=True)
+    date = db.Column(db.DateTime, timezone=True, default=helpers.TIME_NOW, nullable=False)
+    response_in_id = db.Column(db.Integer, nullable=True)
+    updated = db.Column(db.DateTime, timezone=True, default=helpers.TIME_NOW, nullable=True)
+    text = db.Column(db.Text, nullable=False)  # ~16000 of unicode
+    resource_one = db.Column(db.Integer, nullable=True)
+    resource_two = db.Column(db.Integer, nullable=True)
+    resource_three = db.Column(db.Integer, nullable=True)
 
 
 @app.route("/")

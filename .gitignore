@@ -1,4 +1,5 @@
 /.directory
+/venv
 .webassets-cache
 __pycache__
 .vscode
