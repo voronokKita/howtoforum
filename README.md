@@ -1,8 +1,10 @@
 # HOWTO Forum, work in progress
 
 My imageboard-like forum on Flask.
-> venv: source "./_forum_venv/bin/activate"<br>
-start server: FLASK_APP=app.py FLASK_ENV=development flask run
+
+0. pipenv install<br>
+1. pipenv shell<br>
+2. FLASK_APP=app.py FLASK_ENV=development flask run
 
 The goal is to learn the Flask + Apache-server + SQL deployment.
 

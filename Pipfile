@@ -4,9 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-Flask-SQLAlchemy = "1"
-Flask-Assets = "2"
 Flask = "2"
+Flask-Assets = "2"
+pyScss = "1"
+Flask-SQLAlchemy = "1"
 
 [dev-packages]
 

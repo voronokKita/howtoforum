@@ -1,5 +1,7 @@
-def TIME_NOW():
-    return datetime.now(timezone.utc).astimezone().replace(microsecond=0)
+from datetime import datetime, timedelta
+
+def time_now():
+    return datetime.now().replace(microsecond=0)
 
 
 if __name__ == '__main__':
