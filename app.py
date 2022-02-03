@@ -3,13 +3,14 @@ from flask_assets import Environment, Bundle
 from flask_sqlalchemy import SQLAlchemy
 from markupsafe import escape
 
-from datetime import datetime, timedelta
+from helpers import time_now
+
+import datetime
 from pprint import pprint
 import secrets
 import hashlib
 import pathlib
 import re
-import helpers
 
 
 CWD = pathlib.Path.cwd()
@@ -32,7 +33,7 @@ app.config.update(
     DEBUG=True,
     SECRET_KEY=secrets.token_hex(),
     SESSION_COOKIE_SAMESITE='Lax',
-    PERMANENT_SESSION_LIFETIME=timedelta(days=1),
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=1),
     TEMPLATES_AUTO_RELOAD=True,
 
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
@@ -75,7 +76,7 @@ class Statuses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(DEFAULT_LENGTH), unique=True)
 
-    users = db.relationship('Users', backref='status')
+    users = db.relationship('Users', backref='has_status')
 
 class Resource_types(db.Model):
     __tablename__ = 'resource_types'
@@ -83,14 +84,14 @@ class Resource_types(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     resource_type = db.Column(db.String(DEFAULT_LENGTH), unique=True)
 
-    resources = db.relationship('Resources', backref='type')
+    resources = db.relationship('Resources', backref='has_type')
 
 class Threads(db.Model):
     __tablename__ = 'threads'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=helpers.time_now)
-    updated = db.Column(db.DateTime, default=helpers.time_now)
+    date = db.Column(db.DateTime, default=time_now)
+    updated = db.Column(db.DateTime, default=time_now)
     post_count = db.Column(db.Integer, default=0)
     archivated = db.Column(db.Boolean, default=False)
 
@@ -107,10 +108,10 @@ class Users(db.Model):
         db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
         default=STATUS_USER
     )
-    registered = db.Column(db.DateTime, default=helpers.time_now)
+    registered = db.Column(db.DateTime, default=time_now)
 
     resources = db.relationship('Resources', backref='uploaded_by')
-    posts = db.relationship('Posts', backref='username')
+    posts = db.relationship('Posts', backref='author')
 
 attachments = db.Table(
     'attachments',
@@ -129,7 +130,7 @@ class Posts(db.Model):
         default=None
     )
     password = db.Column(db.String(ANON_PASSWROD_LENGTH), default=None)
-    date = db.Column(db.DateTime, default=helpers.time_now)
+    date = db.Column(db.DateTime, default=time_now)
     text = db.Column(db.Text, default=" ")
     has_files = db.Column(db.Boolean, default=False)
 
@@ -146,7 +147,7 @@ class Resources(db.Model):
         default='image'
     )
     user_id = db.Column(db.Integer, db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
-    uploaded = db.Column(db.DateTime, default=helpers.time_now)
+    uploaded = db.Column(db.DateTime, default=time_now)
 
 # </db>
 # TODO: graphics
@@ -158,8 +159,11 @@ def index():
     #db.session.add(r)
     #db.session.commit()
     #r = Statuses.query.filter_by(status="user").first()
-    #print(r)
-    #print(r.status)
+    #a = Posts(thread_id=1, user_id=1, text="Kon'nichiwa!", has_files=True)
+    #b = Resources(resource='images', resource_type=1, user_id=1)
+    #db.session.add_all([a, b])
+    #a.files.append(b)
+    #db.session.commit()
     return render_template("index.html"), 200
 
 
