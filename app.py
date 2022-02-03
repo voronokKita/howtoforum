@@ -22,8 +22,8 @@ USERNAME_MIN = 2
 USERNAME_LENGTH = 20
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
 USER_PASSWORD_MIN = 2
-USER_PASSWROD_LENGTH = 200
-ANON_PASSWROD_LENGTH = 100
+USER_PASSWORD_LENGTH = 200
+ANON_PASSWORD_LENGTH = 100
 RESOURCE_LENGTH = 200
 FORM_LOGIN = ['Name', 'Password']
 
@@ -102,7 +102,7 @@ class Users(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     login = db.Column(db.String(USERNAME_LENGTH), unique=True)
-    password = db.Column(db.String(USER_PASSWROD_LENGTH))
+    password = db.Column(db.String(USER_PASSWORD_LENGTH))
     status = db.Column(
         db.Integer,
         db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
@@ -129,7 +129,7 @@ class Posts(db.Model):
         db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'),
         default=None
     )
-    password = db.Column(db.String(ANON_PASSWROD_LENGTH), default=None)
+    password = db.Column(db.String(ANON_PASSWORD_LENGTH), default=None)
     date = db.Column(db.DateTime, default=time_now)
     text = db.Column(db.Text, default=" ")
     has_files = db.Column(db.Boolean, default=False)
@@ -148,9 +148,8 @@ class Resources(db.Model):
     )
     user_id = db.Column(db.Integer, db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
     uploaded = db.Column(db.DateTime, default=time_now)
-
 # </db>
-# TODO: graphics
+
 
 @app.route("/")
 @app.route("/index")
@@ -176,23 +175,22 @@ def login():
         code = 200
 
     else:
-        username = request.form.get('Name')
-        user_password = request.form.get('Password')
+        input_name = request.form.get('Name')
+        input_password = request.form.get('Password')
 
         error = False
-        if not USERNAME_MIN <= len(username) <= USERNAME_LENGTH:
-            flash("Please match the username length.")
+        if not USERNAME_MIN <= len(input_name) <= USERNAME_LENGTH:
+            flash("The username length don't match.")
             error = True
-        if not re.search(USERNAME_PATTERN, username):
-            flash("Please match the username format.")
+        if not re.search(USERNAME_PATTERN, input_name):
+            flash("The username format don't match.")
             error = True
-        if not USER_PASSWORD_MIN <= len(user_password) <= USER_PASSWROD_LENGTH:
-            flash("Please match the password length.")
+        if not USER_PASSWORD_MIN <= len(input_password) <= USER_PASSWORD_LENGTH:
+            flash("The password length don't match.")
             error = True
-
-        # TODO: db execute SELECT (login, status) FROM users WHERE login = username AND password = user_password;
-        #r = Users.query.filter_by(login=username)
-        #print(r)
+        if not Users.query.filter_by(login=input_name, password=input_password).first():
+            flash("Not found. Check login/password correctness.")
+            error = True
 
         if error:
             template_form = FORM_LOGIN
@@ -204,7 +202,7 @@ def login():
     return render_template(
         "login.html", form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
-        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWROD_LENGTH,
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
         pattern=USERNAME_PATTERN
     ), code
 

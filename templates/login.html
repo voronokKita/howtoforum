@@ -30,9 +30,11 @@
           <p>username: from {{ user_min }} to {{ user_max }} characters; letters, numbers, underscore and minus symbols</p>
           <p>password: from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
         {% endif %}
+        <ul>
         {% for message in get_flashed_messages() %}
-          <p>{{ message }}</p>
+          <li>{{ message }}</li>
         {% endfor %}
+        </ul>
       </div>
 
     </div>
