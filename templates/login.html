@@ -3,10 +3,38 @@
 {% block title %}Login{% endblock %}
 
 {% block header %}Login Page{% endblock %}
-{% block description %}{% endblock %}
+{% block description %}introduce yourself to the forum{% endblock %}
 
 {% block main %}
   <main>
-    Login form
+    <div>
+
+      {% if form %}
+        <form action='/login' method='POST'>
+          {% for field in form %}
+            {% if field == "Name" %}
+              <input type='text' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
+                    minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ pattern }}' required autofocus>
+            {% else %}
+              <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
+                    minlength='{{ pass_min }}' maxlength='{{ pass_max }}' required>
+            {% endif %}
+          {% endfor %}
+          <input type='submit' value="Submit">
+        </form>
+      {% endif %}
+
+      <div>
+        {% if form %}
+          <h6>Help</h6>
+          <p>username: from {{ user_min }} to {{ user_max }} characters; letters, numbers, underscore and minus symbols</p>
+          <p>password: from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
+        {% endif %}
+        {% for message in get_flashed_messages() %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+
+    </div>
   </main>
 {% endblock %}
