@@ -67,79 +67,99 @@ users       -- one-to-many -<   posts
 users       -- one-to-many -<   resources
 resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
-posts       > many-to-many -<   resources
-  posts     -- one-to-many -<   attachments
-  resources -- one-to-many -<   attachments
+posts       >- attachments -<   resources
 """
-
 class Statuses(db.Model):
+    __tablename__ = 'statuses'
+
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False)
-    users = db.relationship('Users', backref='statuses')
+    status = db.Column(db.String(DEFAULT_LENGTH), unique=True)
+
+    users = db.relationship('Users', backref='status')
 
 class Resource_types(db.Model):
+    __tablename__ = 'resource_types'
+
     id = db.Column(db.Integer, primary_key=True)
-    resource_type = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False)
-    resources = db.relationship('Resources', backref='resource_types')
+    resource_type = db.Column(db.String(DEFAULT_LENGTH), unique=True)
+
+    resources = db.relationship('Resources', backref='type')
 
 class Threads(db.Model):
+    __tablename__ = 'threads'
+
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=helpers.time_now, nullable=False)
-    updated = db.Column(db.DateTime, default=helpers.time_now, nullable=False)
-    post_count = db.Column(db.Integer, default=0, nullable=False)
-    archivated = db.Column(db.Boolean, default=False, nullable=False)
-    posts = db.relationship('Posts', backref='threads')
+    date = db.Column(db.DateTime, default=helpers.time_now)
+    updated = db.Column(db.DateTime, default=helpers.time_now)
+    post_count = db.Column(db.Integer, default=0)
+    archivated = db.Column(db.Boolean, default=False)
+
+    posts = db.relationship('Posts', backref='in_thread')
 
 class Users(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    login = db.Column(db.String(USERNAME_LENGTH), unique=True, nullable=False)
-    password = db.Column(db.String(USER_PASSWROD_LENGTH), nullable=False)
-    status = db.Column(db.Integer,
-        db.ForeignKey('statuses.id', onupdate='CASCADE', ondelete='RESTRICT'),
-        default=STATUS_USER, nullable=False)
-    registered = db.Column(db.DateTime, default=helpers.time_now, nullable=True)
-    resources = db.relationship('Resources', backref='users')
-    posts = db.relationship('Posts', backref='users')
+    __tablename__ = 'users'
 
-class Resources(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    resource = db.Column(db.String(RESOURCE_LENGTH), nullable=False)
-    resource_type = db.Column(db.Integer,
-        db.ForeignKey('resource_types.id', onupdate='CASCADE', ondelete='RESTRICT'),
-        default='image', nullable=False)
-    user_id = db.Column(db.Integer,
-        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='SET NULL'),
-        nullable=True)
-    uploaded = db.Column(db.DateTime, default=helpers.time_now, nullable=True)
-    posts = db.relationship('Posts', backref='resources')
-    attachments = db.relationship('Attachments', backref='resources')
+    login = db.Column(db.String(USERNAME_LENGTH), unique=True)
+    password = db.Column(db.String(USER_PASSWROD_LENGTH))
+    status = db.Column(
+        db.Integer,
+        db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
+        default=STATUS_USER
+    )
+    registered = db.Column(db.DateTime, default=helpers.time_now)
+
+    resources = db.relationship('Resources', backref='uploaded_by')
+    posts = db.relationship('Posts', backref='username')
+
+attachments = db.Table(
+    'attachments',
+    db.Column('post_id', db.Integer, db.ForeignKey('posts.id')),
+    db.Column('resource_id', db.Integer, db.ForeignKey('resources.id'))
+)
 
 class Posts(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    thread_id = db.Column(db.Integer,
-        db.ForeignKey('threads.id', onupdate='CASCADE', ondelete='RESTRICT'),
-        nullable=True)
-    user_id = db.Column(db.Integer,
-        db.ForeignKey('users.id', onupdate='CASCADE', ondelete='SET NULL'),
-        default=None, nullable=True)
-    password = db.Column(db.String(ANON_PASSWROD_LENGTH), default=None, nullable=True)
-    date = db.Column(db.DateTime, default=helpers.time_now, nullable=False)
-    text = db.Column(db.Text, default=" ", nullable=False)
-    files = db.Column(db.Boolean, default=False, nullable=False)
-    attachments = db.relationship('Attachments', backref='posts')
+    __tablename__ = 'posts'
 
-class Attachments(db.Model):
-    post_id = db.Column(db.Integer,
-              db.ForeignKey('posts.id', onupdate='CASCADE', ondelete='SET NULL'),
-              primary_key=True)
-    resource_id = db.Column(db.Integer,
-              db.ForeignKey('resources.id', onupdate='CASCADE', ondelete='SET NULL'),
-              primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    thread_id = db.Column(db.Integer, db.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'))
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'),
+        default=None
+    )
+    password = db.Column(db.String(ANON_PASSWROD_LENGTH), default=None)
+    date = db.Column(db.DateTime, default=helpers.time_now)
+    text = db.Column(db.Text, default=" ")
+    has_files = db.Column(db.Boolean, default=False)
+
+    files = db.relationship('Resources', secondary=attachments, backref='in_posts')
+
+class Resources(db.Model):
+    __tablename__ = 'resources'
+
+    id = db.Column(db.Integer, primary_key=True)
+    resource = db.Column(db.String(RESOURCE_LENGTH))
+    resource_type = db.Column(
+        db.Integer,
+        db.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'),
+        default='image'
+    )
+    user_id = db.Column(db.Integer, db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
+    uploaded = db.Column(db.DateTime, default=helpers.time_now)
+
 # </db>
+# TODO: graphics
 
 @app.route("/")
 @app.route("/index")
 def index():
+    #r = Statuses(status="user")
+    #db.session.add(r)
+    #db.session.commit()
+    #r = Statuses.query.filter_by(status="user").first()
+    #print(r)
+    #print(r.status)
     return render_template("index.html"), 200
 
 
