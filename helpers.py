@@ -3,7 +3,16 @@ import datetime
 import secrets
 import hashlib
 import pathlib
+from tempfile import mkdtemp
 from pprint import pprint
+
+GLOBAL_SALT = """So, with sadness in my heart
+Feel the best thing I could do
+Is end it all and leave forever
+What's done is done, it feels so bad
+What once was happy now is sad
+I'll never love again
+My world is ending..."""
 
 STATUS_USER = 1
 STATUS_MOD = 2
@@ -22,7 +31,7 @@ FORM_REGISTER = ['Name', 'Password', 'Repeat password']
 
 
 def time_now():
-    return datetime.now().replace(microsecond=0)
+    return datetime.datetime.now().replace(microsecond=0)
 
 
 def check_login_form(input_name, input_password, input_confirmation=None):
@@ -36,6 +45,17 @@ def check_login_form(input_name, input_password, input_confirmation=None):
     if input_confirmation and not input_password == input_confirmation:
         messages.append("The password fields doesn't match.")
     return messages
+
+
+def hash_password(password, salt=""):
+    if salt:
+        password = hashlib.sha3_512(password.encode()).hexdigest()
+        s = password + salt + GLOBAL_SALT
+        return hashlib.sha3_512(s.encode()).hexdigest()
+    else:
+        password = hashlib.sha3_224(password.encode()).hexdigest()
+        s = password + GLOBAL_SALT
+        return hashlib.sha3_224(s.encode()).hexdigest()
 
 
 if __name__ == '__main__':

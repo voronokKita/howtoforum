@@ -1,0 +1,32 @@
+{% extends "/layouts/layout.html" %}
+
+{% block title %}Anonymization{% endblock %}
+
+{% block header %}Logout Page{% endblock %}
+{% block description %}become anonymous{% endblock %}
+
+{% block main %}
+  <main>
+    <div>
+      {% if form %}
+        <p>
+          Moments of calm<br>
+          Nothing left to be found<br>
+          A mirror right in front of me<br>
+          That's where I find<br>
+          An empty glass<br>
+          Reflecting the sad truth<br>
+          It's telling words not to be told...
+        </p>
+        <form action='/{{ request.url_rule.endpoint }}' method='POST'>
+          <input type='hidden' name="{{ form }}" value="{{ form }}" readonly>
+          <input type='submit' value="I need the mask.">
+        </form>
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}
+
+{% block footer %}
+  {% include "/layouts/footer.html" %}
+{% endblock %}
