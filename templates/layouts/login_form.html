@@ -1,0 +1,14 @@
+{% if form %}
+  <form action='/{{ request.url_rule.endpoint }}' method='POST'>
+    {% for field in form %}
+      {% if field == "Name" %}
+        <input type='text' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
+              minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ pattern }}' required autofocus>
+      {% else %}
+        <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
+              minlength='{{ pass_min }}' maxlength='{{ pass_max }}' required>
+      {% endif %}
+    {% endfor %}
+    <input type='submit' value="Submit">
+  </form>
+{% endif %}

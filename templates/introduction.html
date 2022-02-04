@@ -1,0 +1,31 @@
+{% extends "/layouts/layout.html" %}
+
+{% block title %}Introduction{% endblock %}
+
+{% block header %}Login Page{% endblock %}
+{% block description %}introduce yourself to the forum{% endblock %}
+
+{% block main %}
+  <main>
+    <div>
+
+      {% include "/layouts/login_form.html" %}
+
+      <div>
+        {% if form %}
+          <p><a href="/register">Register a new name ⮒</a></p>
+        {% endif %}
+        <ul>
+        {% for message in get_flashed_messages() %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </main>
+{% endblock %}
+
+{% block footer %}
+  {% include "/layouts/footer.html" %}
+{% endblock %}

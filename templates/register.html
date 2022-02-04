@@ -1,0 +1,34 @@
+{% extends "/layouts/layout.html" %}
+
+{% block title %}Registration{% endblock %}
+
+{% block header %}Sign up{% endblock %}
+{% block description %}register a new name on the forum{% endblock %}
+
+{% block main %}
+  <main>
+    <div>
+
+      {% include "/layouts/login_form.html" %}
+
+      <div>
+        {% if form %}
+          <h6>Help</h6>
+          <p>username: from {{ user_min }} to {{ user_max }} characters; letters, numbers, underscore and minus symbols</p>
+          <p>password: from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
+          <p><a href="/introduction">Back to the login page ⮒</a></p>
+        {% endif %}
+        <ul>
+        {% for message in get_flashed_messages() %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </main>
+{% endblock %}
+
+{% block footer %}
+  {% include "/layouts/footer.html" %}
+{% endblock %}

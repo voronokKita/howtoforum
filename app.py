@@ -1,32 +1,12 @@
 from flask import Flask, url_for, request, session, redirect, render_template, make_response, flash
 from flask_assets import Environment, Bundle
-from flask_sqlalchemy import SQLAlchemy
+
 from markupsafe import escape
 
-from helpers import time_now
-
-import datetime
-from pprint import pprint
-import secrets
-import hashlib
-import pathlib
-import re
+from helpers import *
 
 
 CWD = pathlib.Path.cwd()
-STATUS_USER = 1
-STATUS_MOD = 2
-STATUS_ADMIN = 3
-DEFAULT_LENGTH = 30
-USERNAME_MIN = 2
-USERNAME_LENGTH = 20
-USERNAME_PATTERN = '[A-Za-z0-9_-]+'
-USER_PASSWORD_MIN = 2
-USER_PASSWORD_LENGTH = 200
-ANON_PASSWORD_LENGTH = 100
-RESOURCE_LENGTH = 200
-FORM_LOGIN = ['Name', 'Password']
-
 app = Flask(__name__)
 app.config.update(
     ENV='development',
@@ -37,7 +17,7 @@ app.config.update(
     TEMPLATES_AUTO_RELOAD=True,
 
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
+    SQLALCHEMY_DATABASE_URI="sqlite:///forum.DB"
 )
 
 # <scss>
@@ -57,8 +37,8 @@ scss = Bundle(scss_list, filters='pyscss', output=css_file)
 assets.register('styles', scss)
 # </scss>
 
-# <db>
-db = SQLAlchemy(app)
+# <DB>
+DB = SQLAlchemy(app)
 """
 statuses, users, resources,
 resource_types, threads, posts, attachments
@@ -68,106 +48,106 @@ users       -- one-to-many -<   posts
 users       -- one-to-many -<   resources
 resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
-posts       >- attachments -<   resources
+posts       >- attachments -<DB   resources
 """
-class Statuses(db.Model):
+class Statuses(DB.Model):
     __tablename__ = 'statuses'
 
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(DEFAULT_LENGTH), unique=True)
+    id = DB.Column(DB.Integer, primary_key=True)
+    status = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
 
-    users = db.relationship('Users', backref='has_status')
+    users = DB.relationship('Users', backref='has_status')
 
-class Resource_types(db.Model):
+class Resource_types(DB.Model):
     __tablename__ = 'resource_types'
 
-    id = db.Column(db.Integer, primary_key=True)
-    resource_type = db.Column(db.String(DEFAULT_LENGTH), unique=True)
+    id = DB.Column(DB.Integer, primary_key=True)
+    resource_type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
 
-    resources = db.relationship('Resources', backref='has_type')
+    resources = DB.relationship('Resources', backref='has_type')
 
-class Threads(db.Model):
+class Threads(DB.Model):
     __tablename__ = 'threads'
 
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.DateTime, default=time_now)
-    updated = db.Column(db.DateTime, default=time_now)
-    post_count = db.Column(db.Integer, default=0)
-    archivated = db.Column(db.Boolean, default=False)
+    id = DB.Column(DB.Integer, primary_key=True)
+    date = DB.Column(DB.DateTime, default=time_now)
+    updated = DB.Column(DB.DateTime, default=time_now)
+    post_count = DB.Column(DB.Integer, default=0)
+    archivated = DB.Column(DB.Boolean, default=False)
 
-    posts = db.relationship('Posts', backref='in_thread')
+    posts = DB.relationship('Posts', backref='in_thread')
 
-class Users(db.Model):
+class Users(DB.Model):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True)
-    login = db.Column(db.String(USERNAME_LENGTH), unique=True)
-    password = db.Column(db.String(USER_PASSWORD_LENGTH))
-    status = db.Column(
-        db.Integer,
-        db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
+    id = DB.Column(DB.Integer, primary_key=True)
+    login = DB.Column(DB.String(USERNAME_LENGTH), unique=True)
+    password = DB.Column(DB.String(USER_PASSWORD_LENGTH))
+    status = DB.Column(
+        DB.Integer,
+        DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
         default=STATUS_USER
     )
-    registered = db.Column(db.DateTime, default=time_now)
+    registered = DB.Column(DB.DateTime, default=time_now)
 
-    resources = db.relationship('Resources', backref='uploaded_by')
-    posts = db.relationship('Posts', backref='author')
+    resources = DB.relationship('Resources', backref='uploaded_by')
+    posts = DB.relationship('Posts', backref='author')
 
-attachments = db.Table(
+attachments = DB.Table(
     'attachments',
-    db.Column('post_id', db.Integer, db.ForeignKey('posts.id')),
-    db.Column('resource_id', db.Integer, db.ForeignKey('resources.id'))
+    DB.Column('post_id', DB.Integer, DB.ForeignKey('posts.id')),
+    DB.Column('resource_id', DB.Integer, DB.ForeignKey('resources.id'))
 )
 
-class Posts(db.Model):
+class Posts(DB.Model):
     __tablename__ = 'posts'
 
-    id = db.Column(db.Integer, primary_key=True)
-    thread_id = db.Column(db.Integer, db.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'))
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'),
+    id = DB.Column(DB.Integer, primary_key=True)
+    thread_id = DB.Column(DB.Integer, DB.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'))
+    user_id = DB.Column(
+        DB.Integer,
+        DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'),
         default=None
     )
-    password = db.Column(db.String(ANON_PASSWORD_LENGTH), default=None)
-    date = db.Column(db.DateTime, default=time_now)
-    text = db.Column(db.Text, default=" ")
-    has_files = db.Column(db.Boolean, default=False)
+    password = DB.Column(DB.String(ANON_PASSWORD_LENGTH), default=None)
+    date = DB.Column(DB.DateTime, default=time_now)
+    text = DB.Column(DB.Text, default=" ")
+    has_files = DB.Column(DB.Boolean, default=False)
 
-    files = db.relationship('Resources', secondary=attachments, backref='in_posts')
+    files = DB.relationship('Resources', secondary=attachments, backref='in_posts')
 
-class Resources(db.Model):
+class Resources(DB.Model):
     __tablename__ = 'resources'
 
-    id = db.Column(db.Integer, primary_key=True)
-    resource = db.Column(db.String(RESOURCE_LENGTH))
-    resource_type = db.Column(
-        db.Integer,
-        db.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'),
+    id = DB.Column(DB.Integer, primary_key=True)
+    resource = DB.Column(DB.String(RESOURCE_LENGTH))
+    resource_type = DB.Column(
+        DB.Integer,
+        DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'),
         default='image'
     )
-    user_id = db.Column(db.Integer, db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
-    uploaded = db.Column(db.DateTime, default=time_now)
-# </db>
+    user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
+    uploaded = DB.Column(DB.DateTime, default=time_now)
+# </DB>
 
 
 @app.route("/")
 @app.route("/index")
 def index():
     #r = Statuses(status="user")
-    #db.session.add(r)
-    #db.session.commit()
+    #DB.session.add(r)
+    #DB.session.commit()
     #r = Statuses.query.filter_by(status="user").first()
     #a = Posts(thread_id=1, user_id=1, text="Kon'nichiwa!", has_files=True)
     #b = Resources(resource='images', resource_type=1, user_id=1)
-    #db.session.add_all([a, b])
+    #DB.session.add_all([a, b])
     #a.files.append(b)
-    #db.session.commit()
+    #DB.session.commit()
     return render_template("index.html"), 200
 
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
+@app.route("/introduction", methods=['GET', 'POST'])
+def introduction():
     template_form = None
 
     if request.method == 'GET':
@@ -175,32 +155,58 @@ def login():
         code = 200
 
     else:
-        input_name = request.form.get('Name')
-        input_password = request.form.get('Password')
+        input_name = request.form.get(FORM_LOGIN[0])
+        input_password = request.form.get(FORM_LOGIN[1])
 
-        error = False
-        if not USERNAME_MIN <= len(input_name) <= USERNAME_LENGTH:
-            flash("The username length don't match.")
-            error = True
-        if not re.search(USERNAME_PATTERN, input_name):
-            flash("The username format don't match.")
-            error = True
-        if not USER_PASSWORD_MIN <= len(input_password) <= USER_PASSWORD_LENGTH:
-            flash("The password length don't match.")
-            error = True
-        if not Users.query.filter_by(login=input_name, password=input_password).first():
-            flash("Not found. Check login/password correctness.")
-            error = True
+        messages = check_login_form(input_name, input_password)
 
-        if error:
+        # ! db
+
+        if messages:
+            for message in messages:
+                flash(message)
             template_form = FORM_LOGIN
             code = 403
         else:
-            flash("Welcome back!")
+            flash(f"Welcome back, {input_name}.")
             code = 200
 
     return render_template(
-        "login.html", form=template_form,
+        "introduction.html", form=template_form,
+        user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
+        pattern=USERNAME_PATTERN
+    ), code
+
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    template_form = None
+
+    if request.method == 'GET':
+        template_form = FORM_REGISTER
+        code = 200
+
+    else:
+        input_name = request.form.get(FORM_REGISTER[0])
+        input_password = request.form.get(FORM_REGISTER[1])
+        input_confirmation = request.form.get(FORM_REGISTER[2])
+
+        messages = check_login_form(input_name, input_password, input_confirmation)
+
+        # ! db
+
+        if messages:
+            for message in messages:
+                flash(message)
+            template_form = FORM_REGISTER
+            code = 403
+        else:
+            flash(f"Hello, {input_name}!")
+            code = 200
+
+    return render_template(
+        "register.html", form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
         pattern=USERNAME_PATTERN
