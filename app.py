@@ -221,7 +221,7 @@ def introduction():
             code = 200
 
     return render_template(
-        "introduction.html", form=template_form,
+        "introduction.html", nav=FOOTER, form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
         pattern=USERNAME_PATTERN
@@ -235,7 +235,7 @@ def anonymization():
         if not user:
             return redirect(url_for('index')), 303
         else:
-            return render_template("anonymization.html", form="anonymize"), 200
+            return render_template("anonymization.html", nav=FOOTER, form="anonymize"), 200
 
     else:
         if request.form.get("anonymize"):
@@ -291,7 +291,7 @@ def personal(username):
             code = 200
 
     return render_template(
-        "personal.html", form=template_form,
+        "personal.html", nav=FOOTER, form=template_form,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH
     ), code
 
@@ -338,32 +338,16 @@ def register():
             code = 200
 
     return render_template(
-        "register.html", form=template_form,
+        "register.html", nav=FOOTER, form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
         pattern=USERNAME_PATTERN
     ), code
 
 
-@app.route("/brotherhood/")
-@app.route("/b/")
-@app.route("/b")
-def brotherhood():
-    return render_template("brotherhood.html"), 200
-
-
-@app.route("/animation/")
-@app.route("/a/")
-@app.route("/a")
-def animation():
-    return render_template("animation.html"), 200
-
-
-@app.route("/university/")
-@app.route("/u/")
-@app.route("/u")
-def university():
-    return render_template("university.html"), 200
+@app.route("/board/<board>/")
+def board(board):
+    return render_template("board.html", nav=FOOTER, short=board, long="name", disc="disc"), 200
 
 
 if __name__ == '__main__':
