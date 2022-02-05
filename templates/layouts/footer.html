@@ -30,7 +30,7 @@
     <ul id='login_ul'>
       <li class='login_li'>
         {% if session.user %}
-          {{ session.user.name }}
+          <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a>
         {% else %}
           anonymous
         {% endif %}

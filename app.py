@@ -19,10 +19,7 @@ app.config.update(
     SECRET_KEY=secrets.token_hex(),
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=1),
-    TEMPLATES_AUTO_RELOAD=True,
-
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
+    TEMPLATES_AUTO_RELOAD=True
 )
 
 # <sessions>
@@ -49,7 +46,11 @@ scss = Bundle(scss_list, filters='pyscss', output=css_file)
 assets.register('styles', scss)
 # </scss>
 
-# <DB>
+# <db>
+app.config.update(
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
+)
 DB = SQLAlchemy(app)
 """
 statuses, users, resources,
@@ -60,7 +61,7 @@ users       -- one-to-many -<   posts
 users       -- one-to-many -<   resources
 resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
-posts       >- attachments -<DB   resources
+posts       >- attachments -<db   resources
 """
 class Statuses(DB.Model):
     __tablename__ = 'statuses'
@@ -140,7 +141,7 @@ class Resources(DB.Model):
     )
     user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
     uploaded = DB.Column(DB.DateTime, default=time_now)
-# </DB>
+# </db>
 
 
 @app.route("/")
@@ -159,6 +160,7 @@ def index():
     #u = Users.query.filter_by(login=username).first()
     #u1, u2 = DB.session.query(Users.login, Statuses.status).join(Statuses).filter(Users.login==username).first()
     #print(u1, u2)
+    session['user'] = {'name': "senpai", 'status': "administrator"}
     return render_template("index.html"), 200
 
 
@@ -178,7 +180,7 @@ def introduction():
         input_name = request.form.get(FORM_LOGIN[0])
         input_password = request.form.get(FORM_LOGIN[1])
         escape_name = escape(input_name)
-
+        # check for dirty input
         messages = check_login_form(input_name, input_password)
 
         status = None
@@ -223,6 +225,59 @@ def anonymization():
         return redirect(url_for('index')), 303
 
 
+@app.route("/user/<username>", methods=['GET', 'POST'])
+def personal(username):
+    template_form = None
+    user = session.get('user')
+
+    if request.method == 'GET':
+        if not user:
+            return redirect(url_for('index')), 303
+        else:
+            template_form = FORM_PASSWORD
+            code = 200
+
+    else:
+        input_password = request.form.get(FORM_PASSWORD[0])
+        input_new_password = request.form.get(FORM_PASSWORD[1])
+        input_confirmation = request.form.get(FORM_PASSWORD[2])
+        # check for dirty input
+        messages = check_login_form("none", input_password)
+        messages += check_login_form("none", input_new_password, input_confirmation)
+
+        usr = None
+        hashed = None
+        if not messages:
+            usr = Users.query.filter_by(login = user['name']).first()
+            if not usr.password == hash_password(input_password, usr.login):
+                messages.append("Check out your old password.")
+            else:
+                hashed = hash_password(input_new_password, usr.login)
+                if usr.password == hashed:
+                    messages.append("This is the same password.")
+
+        if not messages:
+            usr.password = hashed
+            try:
+                DB.session.commit()
+            except exc.SQLAlchemyError:
+                messages.append("Something got wrong :(")
+
+        if messages:
+            for message in messages:
+                flash(message)
+            template_form = FORM_PASSWORD
+            code = 400
+        else:
+            flash(f"Password changed.")
+            code = 200
+
+    return render_template(
+        "personal.html", form=template_form,
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH
+    ), code
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     template_form = None
@@ -240,7 +295,7 @@ def register():
         input_password = request.form.get(FORM_REGISTER[1])
         input_confirmation = request.form.get(FORM_REGISTER[2])
         escape_name = escape(input_name)
-
+        # check for dirty input
         messages = check_login_form(input_name, input_password, input_confirmation)
 
         if not messages:

@@ -1,0 +1,40 @@
+{% extends "/layouts/layout.html" %}
+
+{% block title %}{{ session.user.name }}{% endblock %}
+
+{% block header %}{{ session.user.name }}{% endblock %}
+{% block description %}personal page{% endblock %}
+
+{% block main %}
+  <main>
+    <div>
+
+      {% if form %}
+        <form action="/user/{{ session.user.name }}" method='POST'>
+          {% for field in form %}
+            <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
+                   minlength='{{ pass_min }}' maxlength='{{ pass_max }}' required>
+          {% endfor %}
+          <input type='submit' value="Submit">
+        </form>
+      {% endif %}
+
+      <div>
+        {% if form %}
+          <h6>Help</h6>
+          <p>from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
+        {% endif %}
+        <ul>
+        {% for message in get_flashed_messages() %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </main>
+{% endblock %}
+
+{% block footer %}
+  {% include "/layouts/footer.html" %}
+{% endblock %}
