@@ -155,6 +155,10 @@ def index():
     #DB.session.add_all([a, b])
     #a.files.append(b)
     #DB.session.commit()
+    #username = "senpai"
+    #u = Users.query.filter_by(login=username).first()
+    #u1, u2 = DB.session.query(Users.login, Statuses.status).join(Statuses).filter(Users.login==username).first()
+    #print(u1, u2)
     return render_template("index.html"), 200
 
 
@@ -163,8 +167,8 @@ def introduction():
     template_form = None
 
     if request.method == 'GET':
-        username = session.get('username')
-        if username:
+        user = session.get('user')
+        if user:
             return redirect(url_for('index')), 303
         else:
             template_form = FORM_LOGIN
@@ -177,11 +181,13 @@ def introduction():
 
         messages = check_login_form(input_name, input_password)
 
+        status = None
         if not messages:
-            result = Users.query.filter_by(login=escape_name).first()
-            if not result:
+            user, status = DB.session.query(Users, Statuses.status). \
+                join(Statuses).filter(Users.login == escape_name).first()
+            if not user:
                 messages.append("Username not found.")
-            elif not hash_password(input_password, input_name) == result.password:
+            elif not hash_password(input_password, input_name) == user.password:
                 messages.append("Incorrect password.")
 
         if messages:
@@ -190,7 +196,7 @@ def introduction():
             template_form = FORM_LOGIN
             code = 400
         else:
-            session['username'] = escape_name
+            session['user'] = {'name': escape_name, 'status': status}
             flash(f"Welcome back, {escape_name}!")
             code = 200
 
@@ -204,15 +210,16 @@ def introduction():
 
 @app.route("/anonymization", methods=['GET', 'POST'])
 def anonymization():
-    username = session.get('username')
+    user = session.get('user')
     if request.method == 'GET':
-        if not username:
+        if not user:
             return redirect(url_for('index')), 303
         else:
             return render_template("anonymization.html", form="anonymize"), 200
+
     else:
         if request.form.get("anonymize"):
-            session['username'] = None
+            session['user'] = None
         return redirect(url_for('index')), 303
 
 
@@ -221,8 +228,8 @@ def register():
     template_form = None
 
     if request.method == 'GET':
-        username = session.get('username')
-        if username:
+        user = session.get('user')
+        if user:
             return redirect(url_for('index')), 303
         else:
             template_form = FORM_REGISTER
@@ -237,8 +244,8 @@ def register():
         messages = check_login_form(input_name, input_password, input_confirmation)
 
         if not messages:
-            u = Users(login=escape_name, password=hash_password(input_password, input_name))
-            DB.session.add(u)
+            user = Users(login=escape_name, password=hash_password(input_password, input_name))
+            DB.session.add(user)
             try:
                 DB.session.commit()
             except exc.IntegrityError:
@@ -252,7 +259,8 @@ def register():
             template_form = FORM_REGISTER
             code = 400
         else:
-            session['username'] = escape_name
+
+            session['user'] = {'name': escape_name, 'status': STATUS_USER}
             flash(f"Hello, {escape_name}!")
             code = 200
 

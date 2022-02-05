@@ -29,14 +29,14 @@
   <section>
     <ul id='login_ul'>
       <li class='login_li'>
-        {% if session.username %}
-          {{ session.username }}
+        {% if session.user %}
+          {{ session.user.name }}
         {% else %}
           anonymous
         {% endif %}
       </li>
       <li class='login_li'>
-        {% if session.username %}
+        {% if session.user %}
           <a href="/anonymization">become anonymous</a>
         {% else %}
           <a href="/introduction">introduce yourself</a>
