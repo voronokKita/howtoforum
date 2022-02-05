@@ -14,6 +14,7 @@ What once was happy now is sad
 I'll never love again
 My world is ending..."""
 
+FOOTER = []
 STATUS_USER = 1
 STATUS_MOD = 2
 STATUS_ADMIN = 3

@@ -79,10 +79,22 @@ class Resource_types(DB.Model):
 
     resources = DB.relationship('Resources', backref='has_type')
 
+class Boards(DB.Model):
+    __tablename__ = 'boards'
+
+    id = DB.Column(DB.Integer, primary_key=True)
+    short = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
+    name = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
+    description = DB.Column(DB.String(100))
+    thread_count = DB.Column(DB.Integer, default=0)
+
+    threads = DB.relationship('Threads', backref='on_board')
+
 class Threads(DB.Model):
     __tablename__ = 'threads'
 
     id = DB.Column(DB.Integer, primary_key=True)
+    board_id = DB.Column(DB.Integer, DB.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'))
     date = DB.Column(DB.DateTime, default=time_now)
     updated = DB.Column(DB.DateTime, default=time_now)
     post_count = DB.Column(DB.Integer, default=0)
@@ -144,6 +156,12 @@ class Resources(DB.Model):
 # </db>
 
 
+@app.before_first_request
+def before_first_request():
+    global FOOTER
+    FOOTER = [b.short for b in Boards.query.all()]
+
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -161,7 +179,7 @@ def index():
     #u1, u2 = DB.session.query(Users.login, Statuses.status).join(Statuses).filter(Users.login==username).first()
     #print(u1, u2)
     session['user'] = {'name': "senpai", 'status': "administrator"}
-    return render_template("index.html"), 200
+    return render_template("index.html", nav=FOOTER), 200
 
 
 @app.route("/introduction", methods=['GET', 'POST'])
