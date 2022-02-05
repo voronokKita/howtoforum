@@ -47,6 +47,7 @@ assets.register('styles', scss)
 # </scss>
 
 # <db>
+# TODO: indexes
 app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
@@ -160,6 +161,21 @@ class Resources(DB.Model):
 def before_first_request():
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
+    """
+    i = 1
+    while i <= 30:
+        t = Threads(board_id=1, post_count=1)
+        DB.session.add(t)
+        DB.session.commit()
+        p = Posts(thread_id=i, text="test")
+        DB.session.add(p)
+        DB.session.commit()
+        b = Boards.query.filter_by(id=1).first()
+        b.thread_count += 1
+        DB.session.commit()
+        sleep(5)
+        i += 1
+    """
 
 
 @app.route("/")
@@ -346,8 +362,25 @@ def register():
 
 
 @app.route("/board/<board>/")
-def board(board):
-    return render_template("board.html", nav=FOOTER, short=board, long="name", disc="disc"), 200
+@app.route("/board/<board>/<int:page>")
+def board(board, page=1):
+    code = 200
+    board = Boards.query.filter_by(short=escape(board)).first()
+    if not board or page <= 0:
+        return redirect(url_for('index')), 303
+
+    start = page * 10 - 10
+    stop = page * 10
+    threads_of_page = Threads.query.order_by(Threads.updated).slice(start, stop).all()
+    if not threads_of_page:
+        return redirect(url_for('index')), 303
+
+
+    return render_template(
+        "board.html", nav=FOOTER,
+        short_name=board.short, long_name=board.name,
+        description=board.description
+    ), code
 
 
 if __name__ == '__main__':

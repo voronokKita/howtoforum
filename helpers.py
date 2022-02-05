@@ -5,6 +5,7 @@ import hashlib
 import pathlib
 from tempfile import mkdtemp
 from pprint import pprint
+from time import sleep
 
 GLOBAL_SALT = """So, with sadness in my heart
 Feel the best thing I could do
@@ -14,7 +15,6 @@ What once was happy now is sad
 I'll never love again
 My world is ending..."""
 
-FOOTER = []
 STATUS_USER = 1
 STATUS_MOD = 2
 STATUS_ADMIN = 3
@@ -27,6 +27,9 @@ USER_PASSWORD_LENGTH = 200
 ANON_PASSWORD_LENGTH = 100
 RESOURCE_LENGTH = 200
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
+
+FOOTER = []
+THREADS_ON_PAGE = 10
 FORM_LOGIN = ['Name', 'Password']
 FORM_REGISTER = ['Name', 'Password', 'Repeat password']
 FORM_PASSWORD = ['Old password', 'New password', 'Repeat new password']

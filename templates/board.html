@@ -1,9 +1,9 @@
 {% extends "/layouts/layout.html" %}
 
-{% block title %}{{ short }}{% endblock %}
+{% block title %}{{ short_name }}{% endblock %}
 
-{% block header %}{{ long }}{% endblock %}
-{% block description %}{{ disc }}{% endblock %}
+{% block header %}{{ long_name | capitalize }}{% endblock %}
+{% block description %}{{ description }}{% endblock %}
 
 {% block main %}
   <main>
