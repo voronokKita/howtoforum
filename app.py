@@ -372,7 +372,8 @@ def board(board, page=1):
 
     start = page * 10 - 10
     stop = page * 10
-    threads_on_page = Threads.query.order_by(Threads.updated).slice(start, stop).all()
+    threads_on_page = Threads.query.filter(Threads.board_id == board.id). \
+        order_by(Threads.updated).slice(start, stop).all()
     if not threads_on_page:
         return redirect(url_for('index')), 303
 
