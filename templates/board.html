@@ -7,7 +7,25 @@
 
 {% block main %}
   <main>
-    content
+    <div>
+      {% for thread in threads %}
+        <h4>Thread</h4>
+        <p>Archivated: {{ thread.archivated }}</p>
+        <p>Post count: {{ thread.post_count }}</p>
+        <br>
+        {% for post in thread.posts %}
+          <h5>Post #{{ post.id }}</h5>
+          <p>Date: {{ post.date }}</p>
+          <p>Author: {{ post.author }}</p>
+          {% for file in post.files %}
+            <p>File: {{ file }}</p>
+          {% endfor %}
+          <p>Text: {{ post.text }}</p>
+          <br>
+        {% endfor %}
+        <br>
+      {% endfor %}
+    </div>
   </main>
 {% endblock %}
 
