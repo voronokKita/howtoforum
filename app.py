@@ -62,7 +62,7 @@ users       -- one-to-many -<   posts
 users       -- one-to-many -<   resources
 resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
-posts       >- attachments -<db   resources
+posts       >- attachments -<   resources
 """
 class Statuses(DB.Model):
     __tablename__ = 'statuses'
@@ -162,8 +162,9 @@ def before_first_request():
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
     """
-    i = 1
-    while i <= 30:
+    i = 31
+    while i <= 122:
+        print(i)
         t = Threads(board_id=1, post_count=1)
         DB.session.add(t)
         DB.session.commit()
@@ -173,7 +174,7 @@ def before_first_request():
         b = Boards.query.filter_by(id=1).first()
         b.thread_count += 1
         DB.session.commit()
-        sleep(5)
+        sleep(1)
         i += 1
     """
 
@@ -362,7 +363,7 @@ def register():
 
 
 @app.route("/board/<board>/")
-@app.route("/board/<board>/<int:page>")
+@app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
     code = 200
     board = Boards.query.filter_by(short=escape(board)).first()
@@ -371,15 +372,50 @@ def board(board, page=1):
 
     start = page * 10 - 10
     stop = page * 10
-    threads_of_page = Threads.query.order_by(Threads.updated).slice(start, stop).all()
-    if not threads_of_page:
+    threads_on_page = Threads.query.order_by(Threads.updated).slice(start, stop).all()
+    if not threads_on_page:
         return redirect(url_for('index')), 303
 
+    t = len(Threads.query.all())
+    pages_total = int(t / 10) + (t % 10 > 0)
+
+    # fill threads with data and posts
+    threads_with_posts = []
+    for thread in threads_on_page:
+        first_five_posts = Posts.query.filter(Posts.thread_id == thread.id). \
+            order_by(Posts.date.desc()).limit(5).all()
+
+        # turn posts back in order
+        if len(first_five_posts) > 1:
+            first_five_posts.sort(key=lambda p: p.date)
+
+        t = {'post_count': thread.post_count, 'archivated': thread.archivated, 'posts': first_five_posts}
+        threads_with_posts.append(t)
+
+    # fill posts with data
+    for thread in threads_with_posts:
+        new = []
+        for post in thread['posts']:
+            username = None
+            files = []
+
+            if post.user_id: #! fix it
+                username = Users.query.filter(Users.id == post.user_id).first()
+
+            if post.has_files:
+                for f in post.files:
+                    files.append(f.resource)
+
+            p = {'id': post.id, 'date': post.date, 'author': username, 'text': post.text, 'files': files}
+            new.append(p)
+
+        thread['posts'] = new
 
     return render_template(
         "board.html", nav=FOOTER,
         short_name=board.short, long_name=board.name,
-        description=board.description
+        description=board.description,
+        threads=threads_with_posts, pages=pages_total
     ), code
 
 
