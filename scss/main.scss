@@ -1,6 +1,6 @@
 $color_text_normal: black;
-$color_background: snow;
-$color_header: mintcream;
+$color_background: rgb(238, 255, 238);
+$color_header: rgb(190, 255, 179);
 $with_main: 1000px;
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
@@ -31,21 +31,19 @@ body {
 }
 
 header, main {
-  //border: 1px solid rgb(202, 132, 199);
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
   max-width: $with_main;
-  //padding: 6px;
 }
+main {padding: 6px 12px;}
+header {padding: 8px 0;}
 #header_text {
   padding: 4px 16px 4px 8px;
   border: 1px solid $color_header;
   border-radius: 16%;
   background-color: $color_header;
 }
-header {padding: 8px 0;}
-main {padding: 6px 12px;}
 
 img {max-width: 100%; height: auto;}
 ul {list-style-type: none;}

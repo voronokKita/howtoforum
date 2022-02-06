@@ -35,7 +35,7 @@ scss_list = [
     str(scss_dir / "main.scss"),
     str(scss_dir / "footer.scss"),
     str(scss_dir / "index.scss"),
-    str(scss_dir / "login.scss"),
+    str(scss_dir / "menu.scss"),
     str(scss_dir / "board.scss"),
 ]
 css_file = str(CWD / "static" / "css" / "styles.css")

@@ -6,8 +6,13 @@
 {% block description %}become anonymous{% endblock %}
 
 {% block main %}
-  <main>
-    <div>
+  <main class='login_main'>
+
+    <figure class='login_figure'>
+      pic <img>
+    </figure>
+
+    <div class='login_container'>
       {% if form %}
         <p>
           Moments of calm<br>
@@ -20,10 +25,11 @@
         </p>
         <form action='/{{ request.url_rule.endpoint }}' method='POST'>
           <input type='hidden' name="{{ form }}" value="{{ form }}" readonly>
-          <input type='submit' value="I need the mask.">
+          <input type='submit' value="I need the mask." id='anon_submit'>
         </form>
       {% endif %}
     </div>
+
   </main>
 {% endblock %}
 

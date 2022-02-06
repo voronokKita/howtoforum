@@ -6,26 +6,28 @@
 {% block description %}register a new name on the forum{% endblock %}
 
 {% block main %}
-  <main>
-    <div>
+  <main class='login_main'>
 
+    <figure class='login_figure'>
+      pic <img>
+    </figure>
+
+    <div class='login_container'>
       {% include "/layouts/login_form.html" %}
-
-      <div>
+      <ul class='login_list'>
         {% if form %}
-          <h6>Help</h6>
-          <p>username: from {{ user_min }} to {{ user_max }} characters; letters, numbers, underscore and minus symbols</p>
-          <p>password: from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
-          <p><a href="/introduction">Back to the login page ⮒</a></p>
+          <li><h6>Help</h6></li>
+          <li>&nbsp;&nbsp;username: from {{ user_min }} to {{ user_max }} characters;<br>&nbsp;&nbsp;letters, numbers, underscore and minus symbols</li>
+          <li>&nbsp;&nbsp;password: from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
+          <li><a href="/introduction" class='login_link'>Back to the login page ⮒</a></li>
         {% endif %}
-        <ul>
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
-        </ul>
-      </div>
+      </ul>
 
     </div>
+
   </main>
 {% endblock %}
 

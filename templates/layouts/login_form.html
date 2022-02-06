@@ -1,14 +1,16 @@
 {% if form %}
-  <form action='/{{ request.url_rule.endpoint }}' method='POST'>
+  <form action='/{{ request.url_rule.endpoint }}' method='POST' class='login_form'>
     {% for field in form %}
       {% if field == "Name" %}
         <input type='text' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
-               minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ pattern }}' required autofocus>
+               minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ pattern }}'
+               required autofocus class='login_input'>
       {% else %}
         <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
-               minlength='{{ pass_min }}' maxlength='{{ pass_max }}' required>
+               minlength='{{ pass_min }}' maxlength='{{ pass_max }}'
+               required class='login_input'>
       {% endif %}
     {% endfor %}
-    <input type='submit' value="Submit">
+    <input type='submit' value="Submit" class='login_submit'>
   </form>
 {% endif %}

@@ -31,7 +31,7 @@ footer {
   background-color: $color_footer;
   color: rgb(42, 42, 44);
 }
-.nav_button:hover {
+.nav_button:hover, .nav_button:focus {
   color: black;
   background-color: $color_footer_hover;
 }
