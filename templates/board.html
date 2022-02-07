@@ -6,32 +6,42 @@
 {% block description %}{{ description }}{% endblock %}
 
 {% block main %}
-  <main>
-    <div>
+  <main class='boards_main'>
+
+    <div class='boards_container'>
+      <ul class='pages_list'>
+        <div>[</div>
+        {% for p in pages %}
+          <li><a href="{{ base_url }}{{ p }}/">{{ p }}</a></li>
+        {% endfor %}
+        <div>]</div>
+      </ul>
 
       {% for thread in threads %}
-        <section>
+        <section class='thread_section'>
 
-          <div>
-            <h4>Thread</h4>
-            <div>Archivated: {{ thread.archivated }}</div>
-            <div>Post count: {{ thread.post_count }}</div>
+          <div class='thread_header'>
+            <div>{% if thread.archivated %}archive{% else %}alive{% endif %}</div>
+            <div>post count: {{ thread.post_count }}</div>
           </div>
 
           {% for post in thread.posts %}
-            <article>
-              <div>
-                <h5>Author: {{ post.author }}</h5>
-                <div>Date: {{ post.date }}</div>
-                <div>Post #{{ post.id }}</div>
+            <article class='post'>
+              <div class='post_header'>
+                <h5 class='post_theme'>theme</h5>
+                <h6 class='post_author'>author</h6>
+                <div>{{ post.date }}</div>
+                <div>#{{ post.id }}</div>
               </div>
-              <figure>
-                {% for file in post.files %}
-                  <p>File: {{ file }}</p>
-                {% endfor %}
-              </figure>
-              <div>
-                <p>Text: {{ post.text }}</p>
+              <div class='post_content'>
+                <figure class='post_files'>
+                  {% for file in post.files %}
+                    <div>{{ file }}</div>
+                  {% endfor %}
+                </figure>
+                <div class='post_text'>
+                  <p>&nbsp;{{ post.text }}ttttttttttttttt ttttttttttttttttt tttttttttttttttttttt tttttttttttttt</p>
+                </div>
               </div>
             </article>
           {% endfor %}
@@ -39,7 +49,15 @@
         </section>
       {% endfor %}
 
+      <ul class='pages_list'>
+        <div>[</div>
+        {% for p in pages %}
+          <li><a href="{{ base_url }}{{ p }}/">{{ p }}</a></li>
+        {% endfor %}
+        <div>]</div>
+      </ul>
     </div>
+
   </main>
 {% endblock %}
 

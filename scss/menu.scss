@@ -56,6 +56,11 @@
 }
 
 #anon_submit {
-  background-color: none;
-  color: red;
+  background-color: rgb(238, 255, 238);
+  color: rgb(3, 82, 0);
+  text-decoration: underline gray;
+}
+#anon_submit:hover, #anon_submit:focus {
+  color: rgb(41, 145, 1);
+  cursor: pointer;
 }

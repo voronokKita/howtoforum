@@ -48,6 +48,7 @@ assets.register('styles', scss)
 
 # <db>
 # TODO: indexes
+# TODO: thread theme
 app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
@@ -137,7 +138,7 @@ class Posts(DB.Model):
     )
     password = DB.Column(DB.String(ANON_PASSWORD_LENGTH), default=None)
     date = DB.Column(DB.DateTime, default=time_now)
-    text = DB.Column(DB.Text, default=" ")
+    text = DB.Column(DB.Text, default="&nbsp;")
     has_files = DB.Column(DB.Boolean, default=False)
 
     files = DB.relationship('Resources', secondary=attachments, backref='in_posts')
@@ -379,6 +380,8 @@ def board(board, page=1):
 
     t = len(Threads.query.all())
     pages_total = int(t / 10) + (t % 10 > 0)
+    pages_total = [i for i in range(1, pages_total + 1)]
+    base_url = f"/board/{board.short}/"
 
     # fill threads with data and posts
     threads_with_posts = []
@@ -407,7 +410,8 @@ def board(board, page=1):
                 for f in post.files:
                     files.append(f.resource)
 
-            p = {'id': post.id, 'date': post.date, 'author': username, 'text': post.text, 'files': files}
+            p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT), \
+                 'author': username, 'text': post.text, 'files': files}
             new.append(p)
 
         thread['posts'] = new
@@ -415,7 +419,7 @@ def board(board, page=1):
     return render_template(
         "board.html", nav=FOOTER,
         short_name=board.short, long_name=board.name,
-        description=board.description,
+        description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total
     ), code
 

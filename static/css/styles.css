@@ -37,7 +37,7 @@
               #header_text {
                 padding: 4px 16px 4px 8px;
                 border: 1px solid #beffb3;
-                border-radius: 16%;
+                border-radius: 0 16% 16% 0;
                 background-color: #beffb3; }
 
                 img {
@@ -188,7 +188,60 @@ footer {
                     margin-bottom: 6px; }
 
                     #anon_submit {
-                      background-color: none;
-                      color: red; }
+                      background-color: #efe;
+                      color: #035200;
+                      text-decoration: underline gray; }
 
+                      #anon_submit:hover, #anon_submit:focus {
+                        color: #299101;
+                        cursor: pointer; }
 
+.boards_container {
+  width: 100%; }
+
+  .pages_list {
+    float: right; }
+
+    .pages_list * {
+      display: inline; }
+
+      .thread_section {
+        margin-bottom: 14px;
+        border: 1px solid #41f841;
+        border-style: none none solid none; }
+
+        .thread_header {
+          width: fit-content;
+          background-color: #8d8;
+          border: 1px solid #75ff75; }
+
+          .thread_header * {
+            display: inline;
+            width: fit-content;
+            padding: 0 6px 0 1px; }
+
+            .post {
+              margin-bottom: 10px;
+              width: fit-content;
+              background-color: #daf0d6; }
+
+              .post_header {
+                width: fit-content;
+                margin-bottom: 4px; }
+
+                .post_header * {
+                  display: inline;
+                  margin: 0 6px 0 2px; }
+
+                  .post_author {
+                    color: green; }
+
+                    .post_content {
+                      width: fit-content;
+                      padding: 10px 10px 12px 10px; }
+
+                      .post_content * {
+                        display: inline; }
+
+                        .post_text {
+                          padding-left: 18px; }

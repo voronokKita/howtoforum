@@ -6,32 +6,37 @@
 {% block description %}personal page{% endblock %}
 
 {% block main %}
-  <main>
-    <div>
+  <main class='login_main'>
+
+    <figure class='login_figure'>
+      pic <img>
+    </figure>
+
+    <div class='login_container'>
 
       {% if form %}
-        <form action="/user/{{ session.user.name }}" method='POST'>
+        <form action="/user/{{ session.user.name }}" method='POST' class='login_form'>
           {% for field in form %}
-            <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
-                   minlength='{{ pass_min }}' maxlength='{{ pass_max }}' required>
+            <input type='password' name="{{ field }}" placeholder="{{ field }}"
+                   autocomplete='off' minlength='{{ pass_min }}' maxlength='{{ pass_max }}'
+                   required class='login_input'>
           {% endfor %}
-          <input type='submit' value="Submit">
+          <input type='submit' value="Submit" class='login_submit'>
         </form>
       {% endif %}
 
-      <div>
+      <ul class='login_list'>
         {% if form %}
-          <h6>Help</h6>
-          <p>from {{ pass_min }} to {{ pass_max }} unicode symbols</p>
+          <li><h6>Help</h6></li>
+          <li>&nbsp;&nbsp;from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
         {% endif %}
-        <ul>
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
-        </ul>
-      </div>
+      </ul>
 
     </div>
+
   </main>
 {% endblock %}
 
