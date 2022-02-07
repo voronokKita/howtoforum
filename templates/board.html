@@ -9,13 +9,12 @@
   <main class='boards_main'>
 
     <div class='boards_container'>
-      <ul class='pages_list'>
-        <div>[</div>
-        {% for p in pages %}
-          <li><a href="{{ base_url }}{{ p }}/">{{ p }}</a></li>
-        {% endfor %}
-        <div>]</div>
-      </ul>
+
+      {% include "/layouts/list_of_pages.html" %}
+
+      <section class='create_new_thread'>
+        form
+      </section>
 
       {% for thread in threads %}
         <section class='thread_section'>
@@ -40,7 +39,7 @@
                   {% endfor %}
                 </figure>
                 <div class='post_text'>
-                  <p>&nbsp;{{ post.text }}ttttttttttttttt ttttttttttttttttt tttttttttttttttttttt tttttttttttttt</p>
+                  <p>&nbsp;{{ post.text }} ttttttttttttttt ttttttttttttttttt tttttttttttttttttttt tttttttttttttt</p>
                 </div>
               </div>
             </article>
@@ -49,13 +48,8 @@
         </section>
       {% endfor %}
 
-      <ul class='pages_list'>
-        <div>[</div>
-        {% for p in pages %}
-          <li><a href="{{ base_url }}{{ p }}/">{{ p }}</a></li>
-        {% endfor %}
-        <div>]</div>
-      </ul>
+      {% include "/layouts/list_of_pages.html" %}
+
     </div>
 
   </main>

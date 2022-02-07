@@ -29,7 +29,7 @@
           max-width: 1000px; }
 
           main {
-            padding: 6px 12px; }
+            padding: 6px 12px 90px 12px; }
 
             header {
               padding: 8px 0; }
@@ -199,49 +199,69 @@ footer {
 .boards_container {
   width: 100%; }
 
-  .pages_list {
-    float: right; }
+  .pages_list_container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%; }
 
-    .pages_list * {
-      display: inline; }
+    .pages_list {
+      width: fit-content; }
 
-      .thread_section {
-        margin-bottom: 14px;
-        border: 1px solid #41f841;
-        border-style: none none solid none; }
+      .pages_list * {
+        display: inline; }
 
-        .thread_header {
-          width: fit-content;
-          background-color: #8d8;
-          border: 1px solid #75ff75; }
+        .pages_list_square {
+          color: gray; }
 
-          .thread_header * {
-            display: inline;
-            width: fit-content;
-            padding: 0 6px 0 1px; }
+          .pages_list_num {
+            color: olive; }
 
-            .post {
-              margin-bottom: 10px;
-              width: fit-content;
-              background-color: #daf0d6; }
+            .pages_list_num:hover {
+              color: #b4b400; }
 
-              .post_header {
-                width: fit-content;
-                margin-bottom: 4px; }
+              .thread_section {
+                margin-bottom: 14px;
+                border: 1px solid #41f841;
+                border-style: none none solid none; }
 
-                .post_header * {
-                  display: inline;
-                  margin: 0 6px 0 2px; }
+                .thread_header {
+                  width: fit-content;
+                  background-color: #8d8;
+                  border: 1px solid #75ff75; }
 
-                  .post_author {
-                    color: green; }
+                  .thread_header * {
+                    display: inline;
+                    width: fit-content;
+                    padding: 0 6px 0 1px; }
 
-                    .post_content {
+                    .post {
+                      margin-bottom: 10px;
                       width: fit-content;
-                      padding: 10px 10px 12px 10px; }
+                      background-color: #daf0d6; }
 
-                      .post_content * {
-                        display: inline; }
+                      .post_header {
+                        width: fit-content;
+                        margin-bottom: 4px; }
 
-                        .post_text {
-                          padding-left: 18px; }
+                        .post_header * {
+                          display: inline;
+                          margin: 0 6px 0 2px; }
+
+                          .post_author {
+                            color: green; }
+
+                            .post_content {
+                              width: fit-content;
+                              padding: 10px 10px 12px 10px; }
+
+                              .post_content * {
+                                display: inline; }
+
+                                .post_text {
+                                  padding-left: 18px; }
+
+                                  .create_new_thread {
+                                    display: flex;
+                                    flex-flow: column nowrap;
+                                    align-items: center;
+                                    width: 100%; }

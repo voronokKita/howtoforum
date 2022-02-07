@@ -1,0 +1,13 @@
+<div class='pages_list_container'>
+  <ul class='pages_list'>
+    {% for p in pages %}
+      <li>
+        <a href="{{ base_url }}{{ p }}/">
+          <span class='pages_list_square'>[</span>
+          <span class='pages_list_num'>{{ p }}</span>
+          <span class='pages_list_square'>]</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>

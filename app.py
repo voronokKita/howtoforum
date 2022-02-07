@@ -47,8 +47,6 @@ assets.register('styles', scss)
 # </scss>
 
 # <db>
-# TODO: indexes
-# TODO: thread theme
 app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
@@ -65,13 +63,17 @@ resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
 posts       >- attachments -<   resources
 """
+# TODO: indexes
 class Statuses(DB.Model):
     __tablename__ = 'statuses'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    status = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
+    status = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
 
     users = DB.relationship('Users', backref='has_status')
+
+    def __repr__(self):
+        return f"<status: {self.status}>"
 
 class Resource_types(DB.Model):
     __tablename__ = 'resource_types'
@@ -80,6 +82,9 @@ class Resource_types(DB.Model):
     resource_type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
 
     resources = DB.relationship('Resources', backref='has_type')
+
+    def __repr__(self):
+        return f"<resource type: {self.resource_type}>"
 
 class Boards(DB.Model):
     __tablename__ = 'boards'
@@ -92,17 +97,23 @@ class Boards(DB.Model):
 
     threads = DB.relationship('Threads', backref='on_board')
 
-class Threads(DB.Model):
+    def __repr__(self):
+        return f"<board: {self.short}>"
+
+class Threads(DB.Model): # TODO: thread theme
     __tablename__ = 'threads'
 
     id = DB.Column(DB.Integer, primary_key=True)
     board_id = DB.Column(DB.Integer, DB.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'))
-    date = DB.Column(DB.DateTime, default=time_now)
-    updated = DB.Column(DB.DateTime, default=time_now)
+    date = DB.Column(DB.DateTime, default=datetime.datetime.now)
+    updated = DB.Column(DB.DateTime, default=datetime.datetime.now)
     post_count = DB.Column(DB.Integer, default=0)
     archivated = DB.Column(DB.Boolean, default=False)
 
     posts = DB.relationship('Posts', backref='in_thread')
+
+    def __repr__(self):
+        return f"<thread: {self.id} (board {self.board_id})>"
 
 class Users(DB.Model):
     __tablename__ = 'users'
@@ -115,10 +126,13 @@ class Users(DB.Model):
         DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
         default=STATUS_USER
     )
-    registered = DB.Column(DB.DateTime, default=time_now)
+    registered = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
     resources = DB.relationship('Resources', backref='uploaded_by')
     posts = DB.relationship('Posts', backref='author')
+
+    def __repr__(self):
+        return f"<user: {self.login}>"
 
 attachments = DB.Table(
     'attachments',
@@ -137,11 +151,14 @@ class Posts(DB.Model):
         default=None
     )
     password = DB.Column(DB.String(ANON_PASSWORD_LENGTH), default=None)
-    date = DB.Column(DB.DateTime, default=time_now)
+    date = DB.Column(DB.DateTime, default=datetime.datetime.now)
     text = DB.Column(DB.Text, default="&nbsp;")
     has_files = DB.Column(DB.Boolean, default=False)
 
     files = DB.relationship('Resources', secondary=attachments, backref='in_posts')
+
+    def __repr__(self):
+        return f"<post: {self.id}>"
 
 class Resources(DB.Model):
     __tablename__ = 'resources'
@@ -154,7 +171,10 @@ class Resources(DB.Model):
         default='image'
     )
     user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
-    uploaded = DB.Column(DB.DateTime, default=time_now)
+    uploaded = DB.Column(DB.DateTime, default=datetime.datetime.now)
+
+    def __repr__(self):
+        return f"<resource: {self.resource}>"
 # </db>
 
 
@@ -162,6 +182,38 @@ class Resources(DB.Model):
 def before_first_request():
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
+
+    if not Statuses.query.first():
+        one = Statuses(status="user")
+        two = Statuses(status="moderator")
+        three = Statuses(status="administrator")
+        DB.session.add_all([one, two, three])
+        DB.session.commit()
+        print("db: filled statuses table")
+
+    if not Resource_types.query.first():
+        one = Resource_types(resource_type="image")
+        two = Resource_types(resource_type="text")
+        three = Resource_types(resource_type="other")
+        DB.session.add_all([one, two, three])
+        DB.session.commit()
+        print("db: filled resource types")
+
+    if not Boards.query.first():
+        one = Boards(short="b", name="brotherhood", description="polite communication")
+        two = Boards(short="a", name="animation", description="Japanese and other kinds of anime")
+        three = Boards(short="u", name="university", description="knowledge exchange")
+        DB.session.add_all([one, two, three])
+        DB.session.commit()
+        print("db: filled boards list")
+
+    if not Users.query.first():
+        one = Users(login="senpai", password=hash_password("qwerty", "senpai"), status=3)
+        DB.session.add(one)
+        DB.session.commit()
+        print("db: filled users list")
+
+    # TODO: fill threads and posts
     """
     i = 31
     while i <= 122:
@@ -395,6 +447,8 @@ def board(board, page=1):
 
         t = {'post_count': thread.post_count, 'archivated': thread.archivated, 'posts': first_five_posts}
         threads_with_posts.append(t)
+
+    # TODO: sort threads by updated
 
     # fill posts with data
     for thread in threads_with_posts:

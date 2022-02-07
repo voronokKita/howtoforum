@@ -1,11 +1,26 @@
 .boards_container {
   width: 100%;
 }
+
+.pages_list_container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
 .pages_list {
-  float: right; //! change this
+  width: fit-content;
 }
 .pages_list * {
   display: inline;
+}
+.pages_list_square {
+  color: gray;
+}
+.pages_list_num {
+  color: olive;
+}
+.pages_list_num:hover {
+  color: rgb(180, 180, 0);
 }
 
 .thread_section {
@@ -49,4 +64,11 @@
 }
 .post_text {
   padding-left: 18px;
+}
+
+.create_new_thread {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  width: 100%;
 }

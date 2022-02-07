@@ -26,18 +26,16 @@ USER_PASSWORD_MIN = 6
 USER_PASSWORD_LENGTH = 200
 ANON_PASSWORD_LENGTH = 100
 RESOURCE_LENGTH = 200
+
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
 TIME_FORMAT = '%A, %-d day of %B %Y'
-
 FOOTER = []
 THREADS_ON_PAGE = 10
+
 FORM_LOGIN = ['Name', 'Password']
 FORM_REGISTER = ['Name', 'Password', 'Repeat password']
 FORM_PASSWORD = ['Old password', 'New password', 'Repeat new password']
-
-
-def time_now():
-    return datetime.datetime.now().replace(microsecond=0)
+FORM_THREAD = ['Theme', 'Text', 'File', 'File', 'File', 'Password']
 
 
 def check_login_form(input_name, input_password, input_confirmation=None):
