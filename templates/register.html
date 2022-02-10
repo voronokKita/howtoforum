@@ -17,13 +17,17 @@
       <ul class='login_list'>
         {% if form %}
           <li><h6>Help</h6></li>
-          <li>&nbsp;&nbsp;username: from {{ user_min }} to {{ user_max }} characters;<br>&nbsp;&nbsp;letters, numbers, underscore and minus symbols</li>
+          <li>&nbsp;&nbsp;no spaces</li>
+          <li>&nbsp;&nbsp;username: from {{ user_min }} to {{ user_max }} characters;<br>
+              &nbsp;&nbsp;letters, numbers, underscore and minus symbols</li>
           <li>&nbsp;&nbsp;password: from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
-          <li><a href="/introduction" class='login_link'>Back to the login page ⮒</a></li>
         {% endif %}
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
+        {% if form %}
+          <li><a href="/introduction" class='login_link'>Back to the login page ⮒</a></li>
+        {% endif %}
       </ul>
 
     </div>

@@ -3,11 +3,11 @@
     {% for field in form %}
       {% if field == "Name" %}
         <input type='text' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
-               minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ pattern }}'
+               minlength='{{ user_min }}' maxlength='{{ user_max }}' pattern='{{ usr_pattern }}'
                required autofocus class='login_input'>
       {% else %}
         <input type='password' name="{{ field }}" placeholder="{{ field }}" autocomplete='off'
-               minlength='{{ pass_min }}' maxlength='{{ pass_max }}'
+               minlength='{{ pass_min }}' maxlength='{{ pass_max }}' pattern='{{ pass_pattern }}'
                required class='login_input'>
       {% endif %}
     {% endfor %}

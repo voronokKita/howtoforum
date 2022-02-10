@@ -240,7 +240,6 @@ def before_first_request():
                 p2 = Posts(thread_id=thread_id, text=f"reply to {thread_id}")
                 DB.session.add(p2)
                 DB.session.commit()
-                sleep(0.01)
                 thread_id += 1
                 i += 1
 
@@ -252,7 +251,7 @@ def before_first_request():
         DB.session.commit()
         t = Threads.query.order_by(Threads.id.desc()).first()
 
-        p1 = Posts(thread_id=t.id, theme="Hello!", text="Kon'nichiwa!", has_files=True)
+        p1 = Posts(thread_id=t.id, user_id=1, theme="Hello!", text="Kon'nichiwa!", has_files=True)
         DB.session.add(p1)
         file = Resources.query.filter(Resources.id == 1).first()
         p1.files.append(file)
@@ -260,7 +259,7 @@ def before_first_request():
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p2 = Posts(thread_id=t.id, text="I hope you all will behave like a good boys and girls.", has_files=True)
+        p2 = Posts(thread_id=t.id, user_id=2, text="I hope you all will behave like a good boys and girls.", has_files=True)
         DB.session.add(p2)
         file = Resources.query.filter(Resources.id == 2).first()
         p2.files.append(file)
@@ -268,7 +267,7 @@ def before_first_request():
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p3 = Posts(thread_id=t.id, text="I wish I could become a programmer and create my own forum too.", has_files=True)
+        p3 = Posts(thread_id=t.id, user_id=5, text="I wish I could become a programmer and create my own forum too.", has_files=True)
         DB.session.add(p3)
         file = Resources.query.filter(Resources.id == 3).first()
         p3.files.append(file)
@@ -276,7 +275,7 @@ def before_first_request():
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p4 = Posts(thread_id=t.id, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
+        p4 = Posts(thread_id=t.id, user_id=3, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
         DB.session.add(p4)
         file = Resources.query.filter(Resources.id == 4).first()
         p4.files.append(file)
@@ -284,7 +283,7 @@ def before_first_request():
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p5 = Posts(thread_id=t.id, text="I love you all so much!", has_files=True)
+        p5 = Posts(thread_id=t.id, user_id=4, text="I love you all so much!", has_files=True)
         DB.session.add(p5)
         file = Resources.query.filter(Resources.id == 5).first()
         p5.files.append(file)
@@ -313,12 +312,12 @@ def index():
     #u = Users.query.filter_by(login=username).first()
     #u1, u2 = DB.session.query(Users.login, Statuses.status).join(Statuses).filter(Users.login==username).first()
     #print(u1, u2)
-    session['user'] = {'name': "senpai", 'status': "administrator"}
+    #session['user'] = {'name': "senpai", 'status': "administrator"}
     return render_template("index.html", nav=FOOTER), 200
 
 
 @app.route("/introduction", methods=['GET', 'POST'])
-def introduction(): # TODO to lower and format
+def introduction():
     template_form = None
 
     if request.method == 'GET':
@@ -330,8 +329,8 @@ def introduction(): # TODO to lower and format
             code = 200
 
     else:
-        input_name = request.form.get(FORM_LOGIN[0])
-        input_password = request.form.get(FORM_LOGIN[1])
+        input_name = request.form.get(FORM_LOGIN[0]).strip()
+        input_password = request.form.get(FORM_LOGIN[1]).strip()
         escape_name = escape(input_name)
         # check for dirty input
         messages = check_login_form(input_name, input_password)
@@ -359,7 +358,7 @@ def introduction(): # TODO to lower and format
         "introduction.html", nav=FOOTER, form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
-        pattern=USERNAME_PATTERN
+        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN
     ), code
 
 
@@ -391,9 +390,9 @@ def personal(username):
             code = 200
 
     else:
-        input_password = request.form.get(FORM_PASSWORD[0])
-        input_new_password = request.form.get(FORM_PASSWORD[1])
-        input_confirmation = request.form.get(FORM_PASSWORD[2])
+        input_password = request.form.get(FORM_PASSWORD[0]).strip()
+        input_new_password = request.form.get(FORM_PASSWORD[1]).strip()
+        input_confirmation = request.form.get(FORM_PASSWORD[2]).strip()
         # check for dirty input
         messages = check_login_form("none", input_password)
         messages += check_login_form("none", input_new_password, input_confirmation)
@@ -401,7 +400,7 @@ def personal(username):
         usr = None
         hashed = None
         if not messages:
-            usr = Users.query.filter_by(login = user['name']).first()
+            usr = Users.query.filter(Users.login == user['name']).first()
             if not usr.password == hash_password(input_password, usr.login):
                 messages.append("Check out your old password.")
             else:
@@ -427,7 +426,8 @@ def personal(username):
 
     return render_template(
         "personal.html", nav=FOOTER, form=template_form,
-        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
+        pass_pattern=PASSWORD_PATTERN
     ), code
 
 
@@ -444,9 +444,9 @@ def register():
             code = 200
 
     else:
-        input_name = request.form.get(FORM_REGISTER[0])
-        input_password = request.form.get(FORM_REGISTER[1])
-        input_confirmation = request.form.get(FORM_REGISTER[2])
+        input_name = request.form.get(FORM_REGISTER[0]).strip()
+        input_password = request.form.get(FORM_REGISTER[1]).strip()
+        input_confirmation = request.form.get(FORM_REGISTER[2]).strip()
         escape_name = escape(input_name)
         # check for dirty input
         messages = check_login_form(input_name, input_password, input_confirmation)
@@ -467,7 +467,6 @@ def register():
             template_form = FORM_REGISTER
             code = 400
         else:
-
             session['user'] = {'name': escape_name, 'status': STATUS_USER}
             flash(f"Hello, {escape_name}!")
             code = 200
@@ -476,7 +475,7 @@ def register():
         "register.html", nav=FOOTER, form=template_form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
-        pattern=USERNAME_PATTERN
+        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN
     ), code
 
 

@@ -15,12 +15,12 @@
     <div class='login_container'>
       {% include "/layouts/login_form.html" %}
       <ul class='login_list'>
-        {% if form %}
-          <li><a href="/register" class='login_link'>Register a new name ⮒</a></li>
-        {% endif %}
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
+        {% if form %}
+          <li><a href="/register" class='login_link'>Register a new name ⮒</a></li>
+        {% endif %}
       </ul>
     </div>
 

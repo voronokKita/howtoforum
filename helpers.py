@@ -28,6 +28,7 @@ ANON_PASSWORD_LENGTH = 100
 RESOURCE_LENGTH = 200
 
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
+PASSWORD_PATTERN = '[^ ]+'
 TIME_FORMAT = '%A, %-d day of %B %Y'
 FOOTER = []
 THREADS_ON_PAGE = 10
@@ -45,8 +46,10 @@ def check_login_form(input_name, input_password, input_confirmation=None):
     else:
         if not USERNAME_MIN <= len(input_name) <= USERNAME_LENGTH:
             messages.append("The username length doesn't match.")
-        if not re.search(USERNAME_PATTERN, input_name):
+        if not re.fullmatch(USERNAME_PATTERN, input_name):
             messages.append("The username format doesn't match.")
+        if not re.fullmatch(PASSWORD_PATTERN, input_password):
+            messages.append("The password format doesn't match.")
         if not USER_PASSWORD_MIN <= len(input_password) <= USER_PASSWORD_LENGTH:
             messages.append("The password length doesn't match.")
         if input_confirmation and not input_password == input_confirmation:
