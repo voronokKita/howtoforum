@@ -259,34 +259,46 @@ def before_first_request():
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p2 = Posts(thread_id=t.id, user_id=2, text="I hope you all will behave like a good boys and girls.", has_files=True)
+        p2 = Posts(thread_id=t.id, text="First one!")
         DB.session.add(p2)
-        file = Resources.query.filter(Resources.id == 2).first()
-        p2.files.append(file)
         t.post_count += 1
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p3 = Posts(thread_id=t.id, user_id=5, text="I wish I could become a programmer and create my own forum too.", has_files=True)
+        p3 = Posts(thread_id=t.id, text="I'm the strongest!")
         DB.session.add(p3)
-        file = Resources.query.filter(Resources.id == 3).first()
-        p3.files.append(file)
         t.post_count += 1
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p4 = Posts(thread_id=t.id, user_id=3, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
+        p4 = Posts(thread_id=t.id, user_id=2, text="I hope you all will behave like a good boys and girls.", has_files=True)
         DB.session.add(p4)
-        file = Resources.query.filter(Resources.id == 4).first()
+        file = Resources.query.filter(Resources.id == 2).first()
         p4.files.append(file)
         t.post_count += 1
         t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p5 = Posts(thread_id=t.id, user_id=4, text="I love you all so much!", has_files=True)
+        p5 = Posts(thread_id=t.id, user_id=5, text="I wish I could become a programmer and create my own forum too.", has_files=True)
         DB.session.add(p5)
-        file = Resources.query.filter(Resources.id == 5).first()
+        file = Resources.query.filter(Resources.id == 3).first()
         p5.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p6 = Posts(thread_id=t.id, user_id=3, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
+        DB.session.add(p6)
+        file = Resources.query.filter(Resources.id == 4).first()
+        p6.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p7 = Posts(thread_id=t.id, user_id=4, text="I love you all so much!", has_files=True)
+        DB.session.add(p7)
+        file = Resources.query.filter(Resources.id == 5).first()
+        p7.files.append(file)
         t.post_count += 1
         t.updated = datetime.datetime.now()
         DB.session.commit()
@@ -482,7 +494,6 @@ def register():
 @app.route("/board/<board>/")
 @app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
-    code = 200
     board = Boards.query.filter_by(short=escape(board)).first()
     if not board or page <= 0:
         return redirect(url_for('index')), 303
@@ -490,29 +501,34 @@ def board(board, page=1):
     start = page * 10 - 10
     stop = page * 10
     threads_on_page = Threads.query.filter(Threads.board_id == board.id). \
-        order_by(Threads.updated).slice(start, stop).all()
+        order_by(Threads.updated.desc()).slice(start, stop).all()
     if not threads_on_page:
         return redirect(url_for('index')), 303
 
-    t = len(Threads.query.all())
-    pages_total = int(t / 10) + (t % 10 > 0)
+    pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
     pages_total = [i for i in range(1, pages_total + 1)]
     base_url = f"/board/{board.short}/"
 
     # fill threads with data and posts
     threads_with_posts = []
     for thread in threads_on_page:
-        first_five_posts = Posts.query.filter(Posts.thread_id == thread.id). \
-            order_by(Posts.date.desc()).limit(5).all()
+        op = Posts.query.filter(Posts.thread_id == thread.id).order_by(Posts.date).first()
 
-        # turn posts back in order
-        if len(first_five_posts) > 1:
-            first_five_posts.sort(key=lambda p: p.date)
+        last_five_posts = []
+        hidden_posts = False
+        if thread.post_count > 1:
+            last_five_posts = Posts.query.filter(Posts.thread_id == thread.id, Posts.id != op.id). \
+                order_by(Posts.date.desc()).limit(5).all()
 
-        t = {'post_count': thread.post_count, 'archivated': thread.archivated, 'posts': first_five_posts}
+            # turn posts back in order
+            last_five_posts.sort(key=lambda p: p.date)
+
+            if thread.post_count > 6:
+                hidden_posts = True
+
+        t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts, 'op': op,
+             'archivated': thread.archivated, 'posts': last_five_posts}
         threads_with_posts.append(t)
-
-    # TODO: sort threads by updated
 
     # fill posts with data
     for thread in threads_with_posts:
@@ -521,12 +537,14 @@ def board(board, page=1):
             username = None
             files = []
 
-            if post.user_id: #! fix it
-                username = Users.query.filter(Users.id == post.user_id).first()
+            if post.user_id: # TODO
+                u = Users.query.filter(Users.id == post.user_id).first()
+                username = u.login
 
-            if post.has_files:
+            if post.has_files: # TODO
                 for f in post.files:
-                    files.append(f.resource)
+                    p = "./data/?"
+                    files.append({'resource': f.resource, 'path': p})
 
             p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT), \
                  'author': username, 'text': post.text, 'files': files}
@@ -539,7 +557,7 @@ def board(board, page=1):
         short_name=board.short, long_name=board.name,
         description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total
-    ), code
+    ), 200 # TODO threads count and other
 
 
 if __name__ == '__main__':

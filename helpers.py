@@ -29,7 +29,7 @@ RESOURCE_LENGTH = 200
 
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
 PASSWORD_PATTERN = '[^ ]+'
-TIME_FORMAT = '%A, %-d day of %B %Y'
+TIME_FORMAT = '%A, %-d day of %B %Y | %-H:%M:%S'
 FOOTER = []
 THREADS_ON_PAGE = 10
 
