@@ -10,6 +10,7 @@ from flask_session import Session
 
 from helpers import *
 
+# TODO: transactions and ACID
 
 CWD = pathlib.Path.cwd()
 app = Flask(__name__)
@@ -63,7 +64,6 @@ resource_types one-to-many -<   resources
 threads     -- one-to-many -<   posts
 posts       >- attachments -<   resources
 """
-# TODO: indexes
 class Statuses(DB.Model):
     __tablename__ = 'statuses'
 
@@ -79,7 +79,7 @@ class Resource_types(DB.Model):
     __tablename__ = 'resource_types'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    resource_type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
+    resource_type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
 
     resources = DB.relationship('Resources', backref='has_type')
 
@@ -90,25 +90,26 @@ class Boards(DB.Model):
     __tablename__ = 'boards'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    short = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
-    name = DB.Column(DB.String(DEFAULT_LENGTH), unique=True)
-    description = DB.Column(DB.String(100))
-    thread_count = DB.Column(DB.Integer, default=0)
+    short = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, index=True, nullable=False)
+    name = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
+    description = DB.Column(DB.String(100), nullable=False)
+    thread_count = DB.Column(DB.Integer, default=0, nullable=False)
 
     threads = DB.relationship('Threads', backref='on_board')
 
     def __repr__(self):
         return f"<board: {self.short}>"
 
-class Threads(DB.Model): # TODO: thread theme
+class Threads(DB.Model):
     __tablename__ = 'threads'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    board_id = DB.Column(DB.Integer, DB.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'))
-    date = DB.Column(DB.DateTime, default=datetime.datetime.now)
-    updated = DB.Column(DB.DateTime, default=datetime.datetime.now)
-    post_count = DB.Column(DB.Integer, default=0)
-    archivated = DB.Column(DB.Boolean, default=False)
+    board_id = DB.Column(DB.Integer, \
+        DB.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'), index=True, nullable=False)
+    date = DB.Column(DB.DateTime, default=datetime.datetime.now, nullable=False)
+    updated = DB.Column(DB.DateTime, default=datetime.datetime.now, nullable=False)
+    post_count = DB.Column(DB.Integer, default=0, nullable=False)
+    archivated = DB.Column(DB.Boolean, default=False, nullable=False)
 
     posts = DB.relationship('Posts', backref='in_thread')
 
@@ -118,14 +119,12 @@ class Threads(DB.Model): # TODO: thread theme
 class Users(DB.Model):
     __tablename__ = 'users'
 
-    id = DB.Column(DB.Integer, primary_key=True)
-    login = DB.Column(DB.String(USERNAME_LENGTH), unique=True)
-    password = DB.Column(DB.String(USER_PASSWORD_LENGTH))
-    status = DB.Column(
-        DB.Integer,
-        DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'),
-        default=STATUS_USER
-    )
+    id = DB.Column(DB.Integer, primary_key=True, index=True)
+    login = DB.Column(DB.String(USERNAME_LENGTH), unique=True, nullable=False)
+    password = DB.Column(DB.String(USER_PASSWORD_LENGTH), nullable=False)
+    status = DB.Column(DB.Integer, \
+        DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+        default=STATUS_USER, nullable=False)
     registered = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
     resources = DB.relationship('Resources', backref='uploaded_by')
@@ -136,24 +135,23 @@ class Users(DB.Model):
 
 attachments = DB.Table(
     'attachments',
-    DB.Column('post_id', DB.Integer, DB.ForeignKey('posts.id')),
-    DB.Column('resource_id', DB.Integer, DB.ForeignKey('resources.id'))
+    DB.Column('post_id', DB.Integer, DB.ForeignKey('posts.id'), index=True, nullable=False),
+    DB.Column('resource_id', DB.Integer, DB.ForeignKey('resources.id'), nullable=False)
 )
 
 class Posts(DB.Model):
     __tablename__ = 'posts'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    thread_id = DB.Column(DB.Integer, DB.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'))
-    user_id = DB.Column(
-        DB.Integer,
-        DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'),
-        default=None
-    )
+    thread_id = DB.Column(DB.Integer, \
+        DB.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'), index=True, nullable=False)
+    user_id = DB.Column(DB.Integer, \
+        DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'), default=None)
     password = DB.Column(DB.String(ANON_PASSWORD_LENGTH), default=None)
-    date = DB.Column(DB.DateTime, default=datetime.datetime.now)
+    date = DB.Column(DB.DateTime, default=datetime.datetime.now, nullable=False)
+    theme = DB.Column(DB.String(DEFAULT_LENGTH), default=None)
     text = DB.Column(DB.Text, default="&nbsp;")
-    has_files = DB.Column(DB.Boolean, default=False)
+    has_files = DB.Column(DB.Boolean, default=False, nullable=False)
 
     files = DB.relationship('Resources', secondary=attachments, backref='in_posts')
 
@@ -163,13 +161,11 @@ class Posts(DB.Model):
 class Resources(DB.Model):
     __tablename__ = 'resources'
 
-    id = DB.Column(DB.Integer, primary_key=True)
-    resource = DB.Column(DB.String(RESOURCE_LENGTH))
-    resource_type = DB.Column(
-        DB.Integer,
-        DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'),
-        default='image'
-    )
+    id = DB.Column(DB.Integer, primary_key=True, index=True)
+    resource = DB.Column(DB.String(RESOURCE_LENGTH), nullable=False)
+    resource_type = DB.Column(DB.Integer, \
+        DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+        default='image', nullable=False)
     user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
     uploaded = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
@@ -180,9 +176,6 @@ class Resources(DB.Model):
 
 @app.before_first_request
 def before_first_request():
-    global FOOTER
-    FOOTER = [b.short for b in Boards.query.all()]
-
     if not Statuses.query.first():
         one = Statuses(status="user")
         two = Statuses(status="moderator")
@@ -209,27 +202,99 @@ def before_first_request():
 
     if not Users.query.first():
         one = Users(login="senpai", password=hash_password("qwerty", "senpai"), status=3)
-        DB.session.add(one)
+        two = Users(login="maika", password=hash_password("qwerty", "maika"), status=2)
+        three = Users(login="megumin", password=hash_password("qwerty", "megumin"), status=2)
+        four = Users(login="aoba", password=hash_password("qwerty", "aoba"), status=1)
+        five = Users(login="nene", password=hash_password("qwerty", "nene"), status=1)
+        DB.session.add_all([one, two, three, four, five])
         DB.session.commit()
         print("db: filled users list")
 
-    # TODO: fill threads and posts
-    """
-    i = 31
-    while i <= 122:
-        print(i)
-        t = Threads(board_id=1, post_count=1)
+    if not Resources.query.first():
+        one = Resources(resource="436456345.png", resource_type=1, user_id=1)
+        two = Resources(resource="126693345.png", resource_type=1, user_id=2)
+        three = Resources(resource="164376090060.png", resource_type=1, user_id=5)
+        four = Resources(resource="546567543546.png", resource_type=1, user_id=3)
+        five = Resources(resource="4365466546.png", resource_type=1, user_id=4)
+        six = Resources(resource="054634534.jpg", resource_type=1)
+        DB.session.add_all([one, two, three, four, five, six])
+        DB.session.commit()
+        print("db: filled resources list")
+
+    if not Threads.query.first():
+        boards = [1, 2, 3]
+        thread_id = 1
+        for board in boards:
+            b = Boards.query.filter(Boards.id == board).first()
+            i = 1
+            while i <= 142:
+                print(f"db: makes thread {thread_id} on board {board}")
+                t = Threads(id=thread_id, board_id=board, post_count=2)
+                DB.session.add(t)
+                p1 = Posts(thread_id=thread_id, theme="test", text=f"thread №{thread_id}", has_files=True)
+                DB.session.add(p1)
+                file = Resources.query.filter(Resources.id == 6).first()
+                p1.files.append(file)
+                b.thread_count += 1
+                DB.session.commit()
+                p2 = Posts(thread_id=thread_id, text=f"reply to {thread_id}")
+                DB.session.add(p2)
+                DB.session.commit()
+                sleep(0.01)
+                thread_id += 1
+                i += 1
+
+        print(f"db: makes hello thread")
+        t = Threads(board_id=1)
+        b = Boards.query.filter(Boards.id == 1).first()
         DB.session.add(t)
-        DB.session.commit()
-        p = Posts(thread_id=i, text="test")
-        DB.session.add(p)
-        DB.session.commit()
-        b = Boards.query.filter_by(id=1).first()
         b.thread_count += 1
         DB.session.commit()
-        sleep(1)
-        i += 1
-    """
+        t = Threads.query.order_by(Threads.id.desc()).first()
+
+        p1 = Posts(thread_id=t.id, theme="Hello!", text="Kon'nichiwa!", has_files=True)
+        DB.session.add(p1)
+        file = Resources.query.filter(Resources.id == 1).first()
+        p1.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p2 = Posts(thread_id=t.id, text="I hope you all will behave like a good boys and girls.", has_files=True)
+        DB.session.add(p2)
+        file = Resources.query.filter(Resources.id == 2).first()
+        p2.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p3 = Posts(thread_id=t.id, text="I wish I could become a programmer and create my own forum too.", has_files=True)
+        DB.session.add(p3)
+        file = Resources.query.filter(Resources.id == 3).first()
+        p3.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p4 = Posts(thread_id=t.id, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
+        DB.session.add(p4)
+        file = Resources.query.filter(Resources.id == 4).first()
+        p4.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+
+        p5 = Posts(thread_id=t.id, text="I love you all so much!", has_files=True)
+        DB.session.add(p5)
+        file = Resources.query.filter(Resources.id == 5).first()
+        p5.files.append(file)
+        t.post_count += 1
+        t.updated = datetime.datetime.now()
+        DB.session.commit()
+        print("db: filled threads and posts lists")
+
+    global FOOTER
+    FOOTER = [b.short for b in Boards.query.all()]
 
 
 @app.route("/")
@@ -253,7 +318,7 @@ def index():
 
 
 @app.route("/introduction", methods=['GET', 'POST'])
-def introduction():
+def introduction(): # TODO to lower and format
     template_form = None
 
     if request.method == 'GET':
