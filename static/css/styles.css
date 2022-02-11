@@ -207,8 +207,9 @@ footer {
     .pages_list {
       width: fit-content; }
 
-      .pages_list * {
-        display: inline; }
+      .pages_list_li {
+        display: inline;
+        color: gray; }
 
         .pages_list_square {
           color: gray; }
@@ -216,52 +217,57 @@ footer {
           .pages_list_num {
             color: olive; }
 
-            .pages_list_num:hover {
-              color: #b4b400; }
+            .pages_list_li:hover .pages_list_num {
+              color: #5c2e02; }
+              .pages_list_li:hover .pages_list_square {
+                color: #145c02; }
 
-              .thread_section {
-                margin-bottom: 14px;
-                border: 1px solid #41f841;
-                border-style: none none solid none; }
+.thread_section {
+  margin-bottom: 14px;
+  border: 1px solid #41f841;
+  border-style: none none solid none; }
 
-                .thread_header {
+  .thread_header {
+    width: fit-content;
+    background-color: #8d8;
+    border: 1px solid #75ff75; }
+
+    .thread_header * {
+      display: inline;
+      width: fit-content;
+      padding: 0 6px 0 1px; }
+
+      .post {
+        margin-bottom: 10px;
+        width: fit-content;
+        background-color: #daf0d6; }
+
+        .post_header {
+          width: fit-content;
+          margin-bottom: 4px; }
+
+          .post_header * {
+            display: inline;
+            margin: 0 6px 0 2px; }
+
+            .post_theme {
+              color: #992900; }
+
+              .post_author {
+                color: green; }
+
+                .post_content {
                   width: fit-content;
-                  background-color: #8d8;
-                  border: 1px solid #75ff75; }
+                  padding: 10px 10px 12px 10px; }
 
-                  .thread_header * {
-                    display: inline;
-                    width: fit-content;
-                    padding: 0 6px 0 1px; }
+                  .post_content * {
+                    display: inline; }
 
-                    .post {
-                      margin-bottom: 10px;
-                      width: fit-content;
-                      background-color: #daf0d6; }
+                    .post_text {
+                      padding-left: 18px; }
 
-                      .post_header {
-                        width: fit-content;
-                        margin-bottom: 4px; }
-
-                        .post_header * {
-                          display: inline;
-                          margin: 0 6px 0 2px; }
-
-                          .post_author {
-                            color: green; }
-
-                            .post_content {
-                              width: fit-content;
-                              padding: 10px 10px 12px 10px; }
-
-                              .post_content * {
-                                display: inline; }
-
-                                .post_text {
-                                  padding-left: 18px; }
-
-                                  .create_new_thread {
-                                    display: flex;
-                                    flex-flow: column nowrap;
-                                    align-items: center;
-                                    width: 100%; }
+                      .create_new_thread {
+                        display: flex;
+                        flex-flow: column nowrap;
+                        align-items: center;
+                        width: 100%; }

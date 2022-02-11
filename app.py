@@ -541,21 +541,26 @@ def board(board, page=1):
 
     # fill posts with data
     for thread in threads_with_posts:
-        new = []
-        for post in thread['posts']:
+        op = thread['op']
+        last_posts = thread['posts']
+        old_list = [op] + last_posts
+
+        new_list = []
+        for post in old_list:
             username = post.get_user.login if post.user_id else None
 
             files = []
             if post.has_files:
                 for f in post.files:
-                    p = f"./data/{f.get_type.type}/"
-                    files.append({'resource': f.resource, 'path': p})
+                    p = f"/static/data/{f.get_type.type}/"
+                    files.append({'name': f.resource, 'path': p})
 
             p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
                  'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
-            new.append(p)
+            new_list.append(p)
 
-        thread['posts'] = new
+        thread['op'] = new_list[0]
+        thread['posts'] = new_list[1:]
 
     return render_template(
         "board.html", nav=FOOTER, thread_count=board.thread_count,

@@ -5,7 +5,7 @@
 {% block header %}{{ long_name | capitalize }}{% endblock %}
 {% block description %}{{ description }}{% endblock %}
 
-{% block main %} <!-- thread and post count and other -->
+{% block main %}
   <main class='boards_main'>
 
     <div class='boards_container'>
@@ -22,21 +22,42 @@
           <div class='thread_header'>
             <div>{% if thread.archivated %}archive{% else %}alive{% endif %}</div>
             <div>post count: {{ thread.post_count }}</div>
-            <div>hidden posts: {{ hidden_posts }}</div>
           </div>
+          <article class='post'>
+            <div class='post_header'>
+              <figure class='post_files'>
+                {% for file in thread.op.files %}
+                  <div>
+                    <div>{{ file.name }}</div>
+                    <div><img src="{{ file.path }}{{ file.name }}" width=200></div>
+                  </div>
+                {% endfor %}
+              </figure>
+              <h5 class='post_theme'>{% if thread.op.theme %}{{ thread.op.theme }}{% else %}{% endif %}</h5>
+              <h6 class='post_author'>{% if thread.op.author %}{{ thread.op.author }}{% else %}Anonymous{% endif %}</h6>
+              <div>{{ thread.op.date }}</div>
+              <div>#{{ thread.op.id }}</div>
+            </div>
+            <div class='post_content'>
+              <div class='post_text'>
+                <p>&nbsp;{{ thread.op.text }}</p>
+              </div>
+            </div>
+          </article>
 
           {% for post in thread.posts %}
             <article class='post'>
               <div class='post_header'>
-                <h5 class='post_theme'>theme</h5>
-                <h6 class='post_author'>author</h6>
+                <h5 class='post_theme'>{% if post.theme %}{{ post.theme }}{% else %}{% endif %}</h5>
+                <h6 class='post_author'>{% if post.author %}{{ post.author }}{% else %}Anonymous{% endif %}</h6>
                 <div>{{ post.date }}</div>
                 <div>#{{ post.id }}</div>
               </div>
               <div class='post_content'>
                 <figure class='post_files'>
                   {% for file in post.files %}
-                    <div>{{ file }}</div>
+                    <div>{{ file.name }}</div>
+                    <div><img src="{{ file.path }}{{ file.name }}" width=200></div>
                   {% endfor %}
                 </figure>
                 <div class='post_text'>

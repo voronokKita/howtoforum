@@ -1,27 +1,19 @@
-.boards_container {
-  width: 100%;
-}
+.boards_container {width: 100%;}
 
 .pages_list_container {
   display: flex;
   justify-content: flex-end;
   width: 100%;
 }
-.pages_list {
-  width: fit-content;
+.pages_list {width: fit-content;}
+.pages_list_li {display: inline; color: gray;}
+.pages_list_square {color: gray;}
+.pages_list_num {color: olive;}
+.pages_list_li:hover {
+  .pages_list_num {color: rgb(92, 46, 2);}
+  .pages_list_square {color: rgb(20, 92, 2);}
 }
-.pages_list * {
-  display: inline;
-}
-.pages_list_square {
-  color: gray;
-}
-.pages_list_num {
-  color: olive;
-}
-.pages_list_num:hover {
-  color: rgb(180, 180, 0);
-}
+
 
 .thread_section {
   margin-bottom: 14px;
@@ -51,6 +43,9 @@
 .post_header * {
   display: inline;
   margin: 0 6px 0 2px;
+}
+.post_theme {
+  color: rgb(153, 41, 0);
 }
 .post_author {
   color: green;
