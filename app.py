@@ -70,21 +70,23 @@ class Statuses(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True)
     status = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
 
-    users = DB.relationship('Users', backref='has_status')
+    users = DB.relationship('Users', backref='get_status')
 
     def __repr__(self):
         return f"<status: {self.status}>"
+
 
 class Resource_types(DB.Model):
     __tablename__ = 'resource_types'
 
     id = DB.Column(DB.Integer, primary_key=True)
-    resource_type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
+    type = DB.Column(DB.String(DEFAULT_LENGTH), unique=True, nullable=False)
 
-    resources = DB.relationship('Resources', backref='has_type')
+    resources = DB.relationship('Resources', backref='get_type')
 
     def __repr__(self):
-        return f"<resource type: {self.resource_type}>"
+        return f"<resource type: {self.type}>"
+
 
 class Boards(DB.Model):
     __tablename__ = 'boards'
@@ -95,10 +97,11 @@ class Boards(DB.Model):
     description = DB.Column(DB.String(100), nullable=False)
     thread_count = DB.Column(DB.Integer, default=0, nullable=False)
 
-    threads = DB.relationship('Threads', backref='on_board')
+    threads = DB.relationship('Threads', backref='get_board')
 
     def __repr__(self):
         return f"<board: {self.short}>"
+
 
 class Threads(DB.Model):
     __tablename__ = 'threads'
@@ -111,10 +114,11 @@ class Threads(DB.Model):
     post_count = DB.Column(DB.Integer, default=0, nullable=False)
     archivated = DB.Column(DB.Boolean, default=False, nullable=False)
 
-    posts = DB.relationship('Posts', backref='in_thread')
+    posts = DB.relationship('Posts', backref='get_thread')
 
     def __repr__(self):
         return f"<thread: {self.id} (board {self.board_id})>"
+
 
 class Users(DB.Model):
     __tablename__ = 'users'
@@ -127,11 +131,12 @@ class Users(DB.Model):
         default=STATUS_USER, nullable=False)
     registered = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
-    resources = DB.relationship('Resources', backref='uploaded_by')
-    posts = DB.relationship('Posts', backref='author')
+    resources = DB.relationship('Resources', backref='get_user')
+    posts = DB.relationship('Posts', backref='get_user')
 
     def __repr__(self):
         return f"<user: {self.login}>"
+
 
 attachments = DB.Table(
     'attachments',
@@ -153,17 +158,18 @@ class Posts(DB.Model):
     text = DB.Column(DB.Text, default="&nbsp;")
     has_files = DB.Column(DB.Boolean, default=False, nullable=False)
 
-    files = DB.relationship('Resources', secondary=attachments, backref='in_posts')
+    files = DB.relationship('Resources', secondary=attachments, backref='get_posts')
 
     def __repr__(self):
         return f"<post: {self.id}>"
+
 
 class Resources(DB.Model):
     __tablename__ = 'resources'
 
     id = DB.Column(DB.Integer, primary_key=True, index=True)
     resource = DB.Column(DB.String(RESOURCE_LENGTH), nullable=False)
-    resource_type = DB.Column(DB.Integer, \
+    type = DB.Column(DB.Integer, \
         DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), \
         default='image', nullable=False)
     user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
@@ -176,6 +182,7 @@ class Resources(DB.Model):
 
 @app.before_first_request
 def before_first_request():
+    DB.create_all()
     if not Statuses.query.first():
         one = Statuses(status="user")
         two = Statuses(status="moderator")
@@ -185,9 +192,9 @@ def before_first_request():
         print("db: filled statuses table")
 
     if not Resource_types.query.first():
-        one = Resource_types(resource_type="image")
-        two = Resource_types(resource_type="text")
-        three = Resource_types(resource_type="other")
+        one = Resource_types(type="image")
+        two = Resource_types(type="text")
+        three = Resource_types(type="other")
         DB.session.add_all([one, two, three])
         DB.session.commit()
         print("db: filled resource types")
@@ -201,101 +208,98 @@ def before_first_request():
         print("db: filled boards list")
 
     if not Users.query.first():
-        one = Users(login="senpai", password=hash_password("qwerty", "senpai"), status=3)
-        two = Users(login="maika", password=hash_password("qwerty", "maika"), status=2)
-        three = Users(login="megumin", password=hash_password("qwerty", "megumin"), status=2)
-        four = Users(login="aoba", password=hash_password("qwerty", "aoba"), status=1)
-        five = Users(login="nene", password=hash_password("qwerty", "nene"), status=1)
+        s = Statuses.query.all()
+        one = Users(login="senpai", password=hash_password("qwerty", "senpai"), get_status=s[2])
+        two = Users(login="maika", password=hash_password("qwerty", "maika"), get_status=s[1])
+        three = Users(login="megumin", password=hash_password("qwerty", "megumin"), get_status=s[1])
+        four = Users(login="aoba", password=hash_password("qwerty", "aoba"), get_status=s[0])
+        five = Users(login="nene", password=hash_password("qwerty", "nene"), get_status=s[0])
         DB.session.add_all([one, two, three, four, five])
         DB.session.commit()
         print("db: filled users list")
 
     if not Resources.query.first():
-        one = Resources(resource="436456345.png", resource_type=1, user_id=1)
-        two = Resources(resource="126693345.png", resource_type=1, user_id=2)
-        three = Resources(resource="164376090060.png", resource_type=1, user_id=5)
-        four = Resources(resource="546567543546.png", resource_type=1, user_id=3)
-        five = Resources(resource="4365466546.png", resource_type=1, user_id=4)
-        six = Resources(resource="054634534.jpg", resource_type=1)
+        t = Resource_types.query.filter(Resource_types.type == "image").first()
+        u = Users.query.all()
+        one = Resources(resource="436456345.png", get_type=t, get_user=u[0])
+        two = Resources(resource="126693345.png", get_type=t, get_user=u[1])
+        three = Resources(resource="164376090060.png", get_type=t, get_user=u[4])
+        four = Resources(resource="546567543546.png", get_type=t, get_user=u[2])
+        five = Resources(resource="4365466546.png", get_type=t, get_user=u[3])
+        six = Resources(resource="054634534.jpg", get_type=t)
         DB.session.add_all([one, two, three, four, five, six])
         DB.session.commit()
         print("db: filled resources list")
 
     if not Threads.query.first():
-        boards = [1, 2, 3]
+        boards = Boards.query.all()
         thread_id = 1
         for board in boards:
-            b = Boards.query.filter(Boards.id == board).first()
             i = 1
             while i <= 142:
-                print(f"db: makes thread {thread_id} on board {board}")
-                t = Threads(id=thread_id, board_id=board, post_count=2)
+                print(f"db: makes thread {thread_id} on board {board.short}")
+                t = Threads(id=thread_id, post_count=2, get_board=board)
                 DB.session.add(t)
-                p1 = Posts(thread_id=thread_id, theme="test", text=f"thread №{thread_id}", has_files=True)
+                p1 = Posts(get_thread=t, theme="test", text=f"thread №{thread_id}", has_files=True)
                 DB.session.add(p1)
                 file = Resources.query.filter(Resources.id == 6).first()
                 p1.files.append(file)
-                b.thread_count += 1
+                board.thread_count += 1
                 DB.session.commit()
-                p2 = Posts(thread_id=thread_id, text=f"reply to {thread_id}")
+                p2 = Posts(get_thread=t, text=f"reply to {thread_id}")
                 DB.session.add(p2)
                 DB.session.commit()
                 thread_id += 1
                 i += 1
 
         print(f"db: makes hello thread")
-        t = Threads(board_id=1)
-        b = Boards.query.filter(Boards.id == 1).first()
+        b = boards[0]
+        t = Threads(get_board=b)
         DB.session.add(t)
         b.thread_count += 1
         DB.session.commit()
         t = Threads.query.order_by(Threads.id.desc()).first()
+        users = Users.query.all()
 
-        p1 = Posts(thread_id=t.id, user_id=1, theme="Hello!", text="Kon'nichiwa!", has_files=True)
+        p1 = Posts(get_thread=t, get_user=users[0], theme="Hello!", text="Kon'nichiwa!", has_files=True)
         DB.session.add(p1)
         file = Resources.query.filter(Resources.id == 1).first()
         p1.files.append(file)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p2 = Posts(thread_id=t.id, text="First one!")
+        p2 = Posts(get_thread=t, text="First one!")
         DB.session.add(p2)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p3 = Posts(thread_id=t.id, text="I'm the strongest!")
+        p3 = Posts(get_thread=t, text="I'm the strongest!")
         DB.session.add(p3)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p4 = Posts(thread_id=t.id, user_id=2, text="I hope you all will behave like a good boys and girls.", has_files=True)
+        p4 = Posts(get_thread=t, get_user=users[1], text="I hope you all will behave like a good boys and girls.", has_files=True)
         DB.session.add(p4)
         file = Resources.query.filter(Resources.id == 2).first()
         p4.files.append(file)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p5 = Posts(thread_id=t.id, user_id=5, text="I wish I could become a programmer and create my own forum too.", has_files=True)
+        p5 = Posts(get_thread=t, get_user=users[4], text="I wish I could become a programmer and create my own forum too.", has_files=True)
         DB.session.add(p5)
         file = Resources.query.filter(Resources.id == 3).first()
         p5.files.append(file)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p6 = Posts(thread_id=t.id, user_id=3, text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
+        p6 = Posts(get_thread=t, get_user=users[2], text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
         DB.session.add(p6)
         file = Resources.query.filter(Resources.id == 4).first()
         p6.files.append(file)
         t.post_count += 1
-        t.updated = datetime.datetime.now()
         DB.session.commit()
 
-        p7 = Posts(thread_id=t.id, user_id=4, text="I love you all so much!", has_files=True)
+        p7 = Posts(get_thread=t, get_user=users[3], text="I love you all so much!", has_files=True)
         DB.session.add(p7)
         file = Resources.query.filter(Resources.id == 5).first()
         p7.files.append(file)
