@@ -127,8 +127,7 @@ class Users(DB.Model):
     login = DB.Column(DB.String(USERNAME_LENGTH), unique=True, nullable=False)
     password = DB.Column(DB.String(USER_PASSWORD_LENGTH), nullable=False)
     status = DB.Column(DB.Integer, \
-        DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'), \
-        default=STATUS_USER, nullable=False)
+        DB.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'), nullable=False)
     registered = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
     resources = DB.relationship('Resources', backref='get_user')
@@ -170,8 +169,7 @@ class Resources(DB.Model):
     id = DB.Column(DB.Integer, primary_key=True, index=True)
     resource = DB.Column(DB.String(RESOURCE_LENGTH), nullable=False)
     type = DB.Column(DB.Integer, \
-        DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), \
-        default='image', nullable=False)
+        DB.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), nullable=False)
     user_id = DB.Column(DB.Integer, DB.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
     uploaded = DB.Column(DB.DateTime, default=datetime.datetime.now)
 
@@ -182,7 +180,6 @@ class Resources(DB.Model):
 
 @app.before_first_request
 def before_first_request():
-    DB.create_all()
     if not Statuses.query.first():
         one = Statuses(status="user")
         two = Statuses(status="moderator")
@@ -226,8 +223,10 @@ def before_first_request():
         three = Resources(resource="164376090060.png", get_type=t, get_user=u[4])
         four = Resources(resource="546567543546.png", get_type=t, get_user=u[2])
         five = Resources(resource="4365466546.png", get_type=t, get_user=u[3])
-        six = Resources(resource="054634534.jpg", get_type=t)
-        DB.session.add_all([one, two, three, four, five, six])
+        six = Resources(resource="96574552.jpg", get_type=t, get_user=u[3])
+        seven = Resources(resource="0192018.png", get_type=t, get_user=u[3])
+        eight = Resources(resource="054634534.jpg", get_type=t)
+        DB.session.add_all([one, two, three, four, five, six, seven, eight])
         DB.session.commit()
         print("db: filled resources list")
 
@@ -242,7 +241,7 @@ def before_first_request():
                 DB.session.add(t)
                 p1 = Posts(get_thread=t, theme="test", text=f"thread №{thread_id}", has_files=True)
                 DB.session.add(p1)
-                file = Resources.query.filter(Resources.id == 6).first()
+                file = Resources.query.filter(Resources.resource == "054634534.jpg").first()
                 p1.files.append(file)
                 board.thread_count += 1
                 DB.session.commit()
@@ -263,7 +262,7 @@ def before_first_request():
 
         p1 = Posts(get_thread=t, get_user=users[0], theme="Hello!", text="Kon'nichiwa!", has_files=True)
         DB.session.add(p1)
-        file = Resources.query.filter(Resources.id == 1).first()
+        file = Resources.query.filter(Resources.resource == "436456345.png").first()
         p1.files.append(file)
         t.post_count += 1
         DB.session.commit()
@@ -280,29 +279,33 @@ def before_first_request():
 
         p4 = Posts(get_thread=t, get_user=users[1], text="I hope you all will behave like a good boys and girls.", has_files=True)
         DB.session.add(p4)
-        file = Resources.query.filter(Resources.id == 2).first()
+        file = Resources.query.filter(Resources.resource == "126693345.png").first()
         p4.files.append(file)
         t.post_count += 1
         DB.session.commit()
 
         p5 = Posts(get_thread=t, get_user=users[4], text="I wish I could become a programmer and create my own forum too.", has_files=True)
         DB.session.add(p5)
-        file = Resources.query.filter(Resources.id == 3).first()
+        file = Resources.query.filter(Resources.resource == "164376090060.png").first()
         p5.files.append(file)
         t.post_count += 1
         DB.session.commit()
 
         p6 = Posts(get_thread=t, get_user=users[2], text="You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!", has_files=True)
         DB.session.add(p6)
-        file = Resources.query.filter(Resources.id == 4).first()
+        file = Resources.query.filter(Resources.resource == "546567543546.png").first()
         p6.files.append(file)
         t.post_count += 1
         DB.session.commit()
 
         p7 = Posts(get_thread=t, get_user=users[3], text="I love you all so much!", has_files=True)
         DB.session.add(p7)
-        file = Resources.query.filter(Resources.id == 5).first()
-        p7.files.append(file)
+        file1 = Resources.query.filter(Resources.resource == "4365466546.png").first()
+        file2 = Resources.query.filter(Resources.resource == "96574552.jpg").first()
+        file3 = Resources.query.filter(Resources.resource == "0192018.png").first()
+        p7.files.append(file1)
+        p7.files.append(file2)
+        p7.files.append(file3)
         t.post_count += 1
         t.updated = datetime.datetime.now()
         DB.session.commit()
@@ -347,14 +350,13 @@ def introduction():
     else:
         input_name = request.form.get(FORM_LOGIN[0]).strip()
         input_password = request.form.get(FORM_LOGIN[1]).strip()
-        escape_name = escape(input_name)
         # check for dirty input
+        escape_name = escape(input_name)
         messages = check_login_form(input_name, input_password)
 
-        status = None
+        user = None
         if not messages:
-            user, status = DB.session.query(Users, Statuses.status). \
-                join(Statuses).filter(Users.login == escape_name).first()
+            user = Users.query.filter(Users.login == escape_name).first()
             if not user:
                 messages.append("Username not found.")
             elif not hash_password(input_password, input_name) == user.password:
@@ -366,7 +368,7 @@ def introduction():
             template_form = FORM_LOGIN
             code = 400
         else:
-            session['user'] = {'name': escape_name, 'status': status}
+            session['user'] = {'name': user.login, 'status': user.get_status.status}
             flash(f"Welcome back, {escape_name}!")
             code = 200
 
@@ -463,12 +465,14 @@ def register():
         input_name = request.form.get(FORM_REGISTER[0]).strip()
         input_password = request.form.get(FORM_REGISTER[1]).strip()
         input_confirmation = request.form.get(FORM_REGISTER[2]).strip()
-        escape_name = escape(input_name)
         # check for dirty input
+        escape_name = escape(input_name)
         messages = check_login_form(input_name, input_password, input_confirmation)
 
+        user = None
         if not messages:
-            user = Users(login=escape_name, password=hash_password(input_password, input_name))
+            status = Statuses.query.first()
+            user = Users(login=escape_name, get_status=status, password=hash_password(input_password, input_name))
             DB.session.add(user)
             try:
                 DB.session.commit()
@@ -483,7 +487,7 @@ def register():
             template_form = FORM_REGISTER
             code = 400
         else:
-            session['user'] = {'name': escape_name, 'status': STATUS_USER}
+            session['user'] = {'name': user.login, 'status': user.get_status.status}
             flash(f"Hello, {escape_name}!")
             code = 200
 
@@ -498,16 +502,18 @@ def register():
 @app.route("/board/<board>/")
 @app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
-    board = Boards.query.filter_by(short=escape(board)).first()
-    if not board or page <= 0:
+    board = Boards.query.filter(Boards.short == escape(board)).first()
+    if not board:
         return redirect(url_for('index')), 303
+    elif page <= 0:
+        return redirect(url_for('board', board=board.short, page=1)), 303
 
     start = page * 10 - 10
     stop = page * 10
     threads_on_page = Threads.query.filter(Threads.board_id == board.id). \
         order_by(Threads.updated.desc()).slice(start, stop).all()
     if not threads_on_page:
-        return redirect(url_for('index')), 303
+        return redirect(url_for('board', board=board.short, page=1)), 303
 
     pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
     pages_total = [i for i in range(1, pages_total + 1)]
@@ -516,52 +522,47 @@ def board(board, page=1):
     # fill threads with data and posts
     threads_with_posts = []
     for thread in threads_on_page:
-        op = Posts.query.filter(Posts.thread_id == thread.id).order_by(Posts.date).first()
+        op = thread.posts[0]
 
-        last_five_posts = []
+        last_posts = []
         hidden_posts = False
         if thread.post_count > 1:
-            last_five_posts = Posts.query.filter(Posts.thread_id == thread.id, Posts.id != op.id). \
-                order_by(Posts.date.desc()).limit(5).all()
+            posts = thread.posts[1:]
+            l = len(posts)
+            n = POSTS_PER_THREAD * -1 if l >= POSTS_PER_THREAD else l * -1
+            last_posts = posts[n:]
 
-            # turn posts back in order
-            last_five_posts.sort(key=lambda p: p.date)
-
-            if thread.post_count > 6:
+            if l > POSTS_PER_THREAD:
                 hidden_posts = True
 
         t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts, 'op': op,
-             'archivated': thread.archivated, 'posts': last_five_posts}
+             'archivated': thread.archivated, 'posts': last_posts}
         threads_with_posts.append(t)
 
     # fill posts with data
     for thread in threads_with_posts:
         new = []
         for post in thread['posts']:
-            username = None
+            username = post.get_user.login if post.user_id else None
+
             files = []
-
-            if post.user_id: # TODO
-                u = Users.query.filter(Users.id == post.user_id).first()
-                username = u.login
-
-            if post.has_files: # TODO
+            if post.has_files:
                 for f in post.files:
-                    p = "./data/?"
+                    p = f"./data/{f.get_type.type}/"
                     files.append({'resource': f.resource, 'path': p})
 
-            p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT), \
-                 'author': username, 'text': post.text, 'files': files}
+            p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
+                 'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
             new.append(p)
 
         thread['posts'] = new
 
     return render_template(
-        "board.html", nav=FOOTER,
+        "board.html", nav=FOOTER, thread_count=board.thread_count,
         short_name=board.short, long_name=board.name,
         description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total
-    ), 200 # TODO threads count and other
+    ), 200
 
 
 if __name__ == '__main__':

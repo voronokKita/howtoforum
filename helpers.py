@@ -32,6 +32,7 @@ PASSWORD_PATTERN = '[^ ]+'
 TIME_FORMAT = '%A, %-d day of %B %Y | %-H:%M:%S'
 FOOTER = []
 THREADS_ON_PAGE = 10
+POSTS_PER_THREAD = 5
 
 FORM_LOGIN = ['Name', 'Password']
 FORM_REGISTER = ['Name', 'Password', 'Repeat password']
