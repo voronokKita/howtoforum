@@ -533,17 +533,15 @@ def board(board, page=1):
             last_posts = posts[n:]
 
             if l > POSTS_PER_THREAD:
-                hidden_posts = True
+                hidden_posts = thread.post_count - POSTS_PER_THREAD - 1
 
-        t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts, 'op': op,
-             'archivated': thread.archivated, 'posts': last_posts}
+        t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts,
+             'archivated': thread.archivated, 'posts': [op] + last_posts}
         threads_with_posts.append(t)
 
     # fill posts with data
     for thread in threads_with_posts:
-        op = thread['op']
-        last_posts = thread['posts']
-        old_list = [op] + last_posts
+        old_list = thread['posts']
 
         new_list = []
         for post in old_list:
@@ -559,8 +557,7 @@ def board(board, page=1):
                  'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
             new_list.append(p)
 
-        thread['op'] = new_list[0]
-        thread['posts'] = new_list[1:]
+        thread['posts'] = new_list
 
     return render_template(
         "board.html", nav=FOOTER, thread_count=board.thread_count,
