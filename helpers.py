@@ -25,6 +25,50 @@ def hash_password(password, salt=""):
         return hashlib.sha3_224(s.encode()).hexdigest()
 
 
+def fill_board(threads_on_page):
+    # fill threads with data and posts
+    threads_with_posts = []
+    for thread in threads_on_page:
+        op = thread.posts[0]
+
+        last_posts = []
+        hidden_posts = False
+        if thread.post_count > 1:
+            posts = thread.posts[1:]
+            l = len(posts)
+            n = POSTS_PER_THREAD * -1 if l >= POSTS_PER_THREAD else l * -1
+            last_posts = posts[n:]
+
+            if l > POSTS_PER_THREAD:
+                hidden_posts = thread.post_count - POSTS_PER_THREAD - 1
+
+        t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts,
+             'archivated': thread.archivated, 'posts': [op] + last_posts}
+        threads_with_posts.append(t)
+
+    # fill posts with data
+    for thread in threads_with_posts:
+        old_list = thread['posts']
+
+        new_list = []
+        for post in old_list:
+            username = post.get_user.login if post.user_id else None
+
+            files = []
+            if post.has_files:
+                for f in post.files:
+                    p = f"/static/data/{f.get_type.type}/"
+                    files.append({'name': f.resource, 'path': p})
+
+            p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
+                 'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
+            new_list.append(p)
+
+        thread['posts'] = new_list
+
+    return threads_with_posts
+
+
 def fill_the_database():
     if not Statuses.query.first():
         one = Statuses(status="user")

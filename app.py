@@ -5,8 +5,8 @@ from sqlalchemy import exc
 
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
-from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm
-from helpers import check_form, hash_password, fill_the_database
+from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
+from helpers import check_form, hash_password, fill_the_database, fill_board
 from constants import *
 
 # TODO: transactions and ACID
@@ -167,6 +167,9 @@ def board(board, page=1):
         return redirect(url_for('index')), 303
     elif page <= 0:
         return redirect(url_for('board', board=board.short, page=1)), 303
+    else:
+        form_thread = MakeThread()
+        form_post = MakePost()
 
     start = page * 10 - 10
     stop = page * 10
@@ -179,51 +182,14 @@ def board(board, page=1):
     pages_total = [i for i in range(1, pages_total + 1)]
     base_url = f"/board/{board.short}/"
 
-    # fill threads with data and posts
-    threads_with_posts = []
-    for thread in threads_on_page:
-        op = thread.posts[0]
-
-        last_posts = []
-        hidden_posts = False
-        if thread.post_count > 1:
-            posts = thread.posts[1:]
-            l = len(posts)
-            n = POSTS_PER_THREAD * -1 if l >= POSTS_PER_THREAD else l * -1
-            last_posts = posts[n:]
-
-            if l > POSTS_PER_THREAD:
-                hidden_posts = thread.post_count - POSTS_PER_THREAD - 1
-
-        t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts,
-             'archivated': thread.archivated, 'posts': [op] + last_posts}
-        threads_with_posts.append(t)
-
-    # fill posts with data
-    for thread in threads_with_posts:
-        old_list = thread['posts']
-
-        new_list = []
-        for post in old_list:
-            username = post.get_user.login if post.user_id else None
-
-            files = []
-            if post.has_files:
-                for f in post.files:
-                    p = f"/static/data/{f.get_type.type}/"
-                    files.append({'name': f.resource, 'path': p})
-
-            p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
-                 'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
-            new_list.append(p)
-
-        thread['posts'] = new_list
+    threads_with_posts = fill_board(threads_on_page)
 
     return render_template(
         "board.html", nav=FOOTER, thread_count=board.thread_count,
         short_name=board.short, long_name=board.name,
         description=board.description, base_url=base_url,
-        threads=threads_with_posts, pages=pages_total
+        threads=threads_with_posts, pages=pages_total,
+        form_thread=form_thread, form_post=form_post
     ), 200
 
 

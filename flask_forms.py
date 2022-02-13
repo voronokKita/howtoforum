@@ -1,63 +1,77 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, PasswordField, HiddenField, TextAreaField, validators
+from wtforms.validators import DataRequired, Length, EqualTo
 
 from constants import *
+
+M_WRONG = "Wrong input."
+M_EMPTY = "Empty input."
+M_USERNAME_LEN = "The username length doesn't match."
+M_PASSWORD_LEN = "The password length doesn't match."
+M_PASSWORD_CONFIRM = "The password confirmation doesn't match."
 
 
 class LoginForm(FlaskForm):
     name = StringField("Name", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USERNAME_MIN, max=USERNAME_LENGTH, \
-            message="The username length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USERNAME_MIN, max=USERNAME_LENGTH, message=M_USERNAME_LEN)
     ])
     password = PasswordField("Password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN)
     ])
     submit = SubmitField()
 
 
 class AnonymizeForm(FlaskForm):
-    anonymize = HiddenField("Anonymize", [validators.DataRequired(message="Wrong input.")])
+    anonymize = HiddenField("Anonymize", [DataRequired(message=M_WRONG)])
     anon_submit = SubmitField()
 
 
 class ChangePassword(FlaskForm):
     old_password = PasswordField("Old password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN)
     ])
     new_password = PasswordField("New password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match."),
-        validators.EqualTo('confirmation', message="The password confirmation doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN),
+        EqualTo('confirmation', message=M_PASSWORD_CONFIRM)
     ])
     confirmation = PasswordField("Repeat password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN)
     ])
     submit = SubmitField()
 
 
 class RegisterForm(FlaskForm):
     name = StringField("Name", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USERNAME_MIN, max=USERNAME_LENGTH, \
-            message="The username length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USERNAME_MIN, max=USERNAME_LENGTH, message=M_USERNAME_LEN)
     ])
     password = PasswordField("Password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match."),
-        validators.EqualTo('confirmation', message="The password confirmation doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN),
+        EqualTo('confirmation', message=M_PASSWORD_CONFIRM)
     ])
     confirmation = PasswordField("Repeat password", [
-        validators.DataRequired(message="Empty input."),
-        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
-            message="The password length doesn't match.")
+        DataRequired(message=M_EMPTY),
+        Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, message=M_PASSWORD_LEN)
     ])
     submit = SubmitField()
+
+
+class MakeThread(FlaskForm):
+    theme = StringField("Theme", [
+        Length(max=DEFAULT_LENGTH, message=f"Theme is {DEFAULT_LENGTH} symbols max.")
+    ])
+    password = PasswordField("Password", [
+        Length(max=ANON_PASSWORD_LENGTH, message=f"Theme is {ANON_PASSWORD_LENGTH} symbols max.")
+    ])
+    text = TextAreaField("Text")
+    submit = SubmitField()
+
+
+class MakePost(MakeThread):
+    thread_id = HiddenField("Thread", [DataRequired(message=M_EMPTY)])
