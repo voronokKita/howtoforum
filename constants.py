@@ -8,6 +8,8 @@ from pprint import pprint
 from time import sleep
 
 
+CWD = pathlib.Path.cwd()
+
 USERNAME_MIN = 2
 USERNAME_LENGTH = 20
 DEFAULT_LENGTH = 30
