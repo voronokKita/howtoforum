@@ -13,15 +13,35 @@
     </figure>
 
     <div class='login_container'>
-      {% include "/layouts/login_form.html" %}
+
+      {% if form %}
+        <form action='/{{ request.url_rule.endpoint }}' method='POST' class='login_form'>
+          {{ form.csrf_token }}
+          {{ form.name(placeholder="Name", autofocus=True, pattern=usr_pattern, class='login_input') }}
+          {{ form.password(placeholder="Password", pattern=pass_pattern, class='login_input') }}
+          {{ form.submit(class='login_submit') }}
+        </form>
+      {% endif %}
+
       <ul class='login_list'>
+        {% if form %}
+          {% for error in form.name.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+          {% for error in form.password.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        {% endif %}
+
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
+
         {% if form %}
           <li><a href="/register" class='login_link'>Register a new name ⮒</a></li>
         {% endif %}
       </ul>
+
     </div>
 
   </main>

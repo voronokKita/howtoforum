@@ -24,5 +24,5 @@ I learned and clarified the things I wanted to. Now I'll just write a working fo
 
 #### update three
 
-There's so much depth in sites development, even the simplest thing can be a rabbit hole to endless variants of implementation and new fields of knowledge.
-Need in multiple forms lead me to WTForms package, with I going to learn now.
+There's so much depth in sites development, even the simplest thing can be a rabbit hole to endless variants of implementation and new fields of knowledge.<br>
+Need in multiple forms lead me to WTForms package, that I going to learn now.

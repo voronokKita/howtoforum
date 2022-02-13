@@ -23,9 +23,10 @@
           Reflecting the sad truth<br>
           It's telling words not to be told...
         </p>
-        <form action='/{{ request.url_rule.endpoint }}' method='POST'>
-          <input type='hidden' name="{{ form }}" value="{{ form }}" readonly>
-          <input type='submit' value="I need the mask." id='anon_submit'>
+        <form action="/{{ request.url_rule.endpoint }}" method='POST'>
+          {{ form.csrf_token }}
+          {{ form.anonymize(value="anonymize", readonly=True) }}
+          {{ form.anon_submit(value="I need the mask.") }}
         </form>
       {% endif %}
     </div>

@@ -13,7 +13,17 @@
     </figure>
 
     <div class='login_container'>
-      {% include "/layouts/login_form.html" %}
+
+      {% if form %}
+        <form action='/{{ request.url_rule.endpoint }}' method='POST' class='login_form'>
+          {{ form.csrf_token }}
+          {{ form.name(placeholder="Name", autofocus=True, pattern=usr_pattern, class='login_input') }}
+          {{ form.password(placeholder="Password", pattern=pass_pattern, class='login_input') }}
+          {{ form.confirmation(placeholder="Repeat password", pattern=pass_pattern, class='login_input') }}
+          {{ form.submit(class='login_submit') }}
+        </form>
+      {% endif %}
+
       <ul class='login_list'>
         {% if form %}
           <li><h6>Help</h6></li>
@@ -22,9 +32,23 @@
               &nbsp;&nbsp;letters, numbers, underscore and minus symbols</li>
           <li>&nbsp;&nbsp;password: from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
         {% endif %}
+
+        {% if form %}
+          {% for error in form.name.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+          {% for error in form.password.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+          {% for error in form.confirmation.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        {% endif %}
+
         {% for message in get_flashed_messages() %}
           <li>{{ message }}</li>
         {% endfor %}
+
         {% if form %}
           <li><a href="/introduction" class='login_link'>Back to the login page ⮒</a></li>
         {% endif %}

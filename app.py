@@ -1,14 +1,18 @@
 from flask import Flask, url_for, request, session, redirect, render_template, make_response, flash
 from markupsafe import escape
 
+from flask_session import Session
+
 from flask_assets import Environment, Bundle
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
 
-from flask_session import Session
+from flask_wtf import FlaskForm
+from wtforms import SubmitField, StringField, PasswordField, HiddenField, TextAreaField, validators
 
-from helpers import *
+from constants import *
+from helpers import check_form, hash_password
 
 # TODO: transactions and ACID
 
@@ -178,6 +182,66 @@ class Resources(DB.Model):
 # </db>
 
 
+# <forms>
+class LoginForm(FlaskForm):
+    name = StringField("Name", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USERNAME_MIN, max=USERNAME_LENGTH, \
+            message="The username length doesn't match.")
+    ])
+    password = PasswordField("Password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match.")
+    ])
+    submit = SubmitField()
+
+
+class AnonymizeForm(FlaskForm):
+    anonymize = HiddenField("Anonymize", [validators.DataRequired(message="Wrong input.")])
+    anon_submit = SubmitField()
+
+
+class ChangePassword(FlaskForm):
+    old_password = PasswordField("Old password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match.")
+    ])
+    new_password = PasswordField("New password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match."),
+        validators.EqualTo('confirmation', message="The password confirmation doesn't match.")
+    ])
+    confirmation = PasswordField("Repeat password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match.")
+    ])
+    submit = SubmitField()
+
+
+class RegisterForm(FlaskForm):
+    name = StringField("Name", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USERNAME_MIN, max=USERNAME_LENGTH, \
+            message="The username length doesn't match.")
+    ])
+    password = PasswordField("Password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match."),
+        validators.EqualTo('confirmation', message="The password confirmation doesn't match.")
+    ])
+    confirmation = PasswordField("Repeat password", [
+        validators.DataRequired(message="Empty input."),
+        validators.Length(min=USER_PASSWORD_MIN, max=USER_PASSWORD_LENGTH, \
+            message="The password length doesn't match.")
+    ])
+    submit = SubmitField()
+# </forms>
+
 @app.before_first_request
 def before_first_request():
     if not Statuses.query.first():
@@ -318,116 +382,82 @@ def before_first_request():
 @app.route("/")
 @app.route("/index")
 def index():
-    #r = Statuses(status="user")
-    #DB.session.add(r)
-    #DB.session.commit()
-    #r = Statuses.query.filter_by(status="user").first()
-    #a = Posts(thread_id=1, user_id=1, text="Kon'nichiwa!", has_files=True)
-    #b = Resources(resource='images', resource_type=1, user_id=1)
-    #DB.session.add_all([a, b])
-    #a.files.append(b)
-    #DB.session.commit()
-    #username = "senpai"
-    #u = Users.query.filter_by(login=username).first()
-    #u1, u2 = DB.session.query(Users.login, Statuses.status).join(Statuses).filter(Users.login==username).first()
-    #print(u1, u2)
     #session['user'] = {'name': "senpai", 'status': "administrator"}
     return render_template("index.html", nav=FOOTER), 200
 
 
 @app.route("/introduction", methods=['GET', 'POST'])
 def introduction():
-    template_form = None
+    form = LoginForm()
+    code = 200
 
-    if request.method == 'GET':
-        user = session.get('user')
-        if user:
-            return redirect(url_for('index')), 303
-        else:
-            template_form = FORM_LOGIN
-            code = 200
+    if request.method == 'GET' and session.get('user'):
+        return redirect(url_for('index')), 303
 
-    else:
-        input_name = request.form.get(FORM_LOGIN[0]).strip()
-        input_password = request.form.get(FORM_LOGIN[1]).strip()
-        # check for dirty input
-        escape_name = escape(input_name)
-        messages = check_login_form(input_name, input_password)
+    elif form.validate_on_submit():
+        messages = check_form(form.name.data, form.password.data)
 
         user = None
         if not messages:
-            user = Users.query.filter(Users.login == escape_name).first()
+            user = Users.query.filter(Users.login == escape(form.name.data)).first()
             if not user:
                 messages.append("Username not found.")
-            elif not hash_password(input_password, input_name) == user.password:
+            elif not user.password == hash_password(form.password.data, form.name.data):
                 messages.append("Incorrect password.")
 
         if messages:
             for message in messages:
                 flash(message)
-            template_form = FORM_LOGIN
             code = 400
         else:
             session['user'] = {'name': user.login, 'status': user.get_status.status}
-            flash(f"Welcome back, {escape_name}!")
-            code = 200
+            flash(f"Welcome back, {user.login}!")
+            form = None
 
-    return render_template(
-        "introduction.html", nav=FOOTER, form=template_form,
-        user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
-        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
-        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN
-    ), code
+    return render_template("introduction.html", nav=FOOTER, form=form, \
+        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN), code
 
 
 @app.route("/anonymization", methods=['GET', 'POST'])
 def anonymization():
-    user = session.get('user')
-    if request.method == 'GET':
-        if not user:
-            return redirect(url_for('index')), 303
-        else:
-            return render_template("anonymization.html", nav=FOOTER, form="anonymize"), 200
+    form = AnonymizeForm()
 
-    else:
-        if request.form.get("anonymize"):
-            session['user'] = None
+    if request.method == 'GET' and not session.get('user'):
         return redirect(url_for('index')), 303
+
+    elif form.validate_on_submit():
+        session['user'] = None
+        return redirect(url_for('index')), 303
+
+    return render_template("anonymization.html", nav=FOOTER, form=form), 200
 
 
 @app.route("/user/<username>", methods=['GET', 'POST'])
 def personal(username):
-    template_form = None
     user = session.get('user')
+    form = ChangePassword()
+    code = 200
 
-    if request.method == 'GET':
-        if not user:
-            return redirect(url_for('index')), 303
-        else:
-            template_form = FORM_PASSWORD
-            code = 200
+    if request.method == 'GET' and not user:
+        return redirect(url_for('index')), 303
 
-    else:
-        input_password = request.form.get(FORM_PASSWORD[0]).strip()
-        input_new_password = request.form.get(FORM_PASSWORD[1]).strip()
-        input_confirmation = request.form.get(FORM_PASSWORD[2]).strip()
-        # check for dirty input
-        messages = check_login_form("none", input_password)
-        messages += check_login_form("none", input_new_password, input_confirmation)
+    elif form.validate_on_submit():
+        messages = check_form("none", form.old_password.data)
+        messages += check_form("none", form.new_password.data, form.confirmation.data)
 
-        usr = None
         hashed = None
         if not messages:
-            usr = Users.query.filter(Users.login == user['name']).first()
-            if not usr.password == hash_password(input_password, usr.login):
+            user = Users.query.filter(Users.login == user['name']).first()
+
+            if not user.password == hash_password(form.old_password.data, user.login):
                 messages.append("Check out your old password.")
             else:
-                hashed = hash_password(input_new_password, usr.login)
-                if usr.password == hashed:
-                    messages.append("This is the same password.")
+                hashed = hash_password(form.new_password.data, user.login)
+                if user.password == hashed:
+                    messages.append("This is the same old password.")
 
         if not messages:
-            usr.password = hashed
+            user.password = hashed
             try:
                 DB.session.commit()
             except exc.SQLAlchemyError:
@@ -436,43 +466,32 @@ def personal(username):
         if messages:
             for message in messages:
                 flash(message)
-            template_form = FORM_PASSWORD
             code = 400
         else:
             flash(f"Password changed.")
+            form = None
             code = 200
 
-    return render_template(
-        "personal.html", nav=FOOTER, form=template_form,
-        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
-        pass_pattern=PASSWORD_PATTERN
-    ), code
+    return render_template("personal.html", nav=FOOTER, form=form, \
+        pass_pattern=PASSWORD_PATTERN, pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH), code
 
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
-    template_form = None
+    user = session.get('user')
+    form = RegisterForm()
+    code = 200
 
-    if request.method == 'GET':
-        user = session.get('user')
-        if user:
-            return redirect(url_for('index')), 303
-        else:
-            template_form = FORM_REGISTER
-            code = 200
+    if request.method == 'GET' and user:
+        return redirect(url_for('index')), 303
 
-    else:
-        input_name = request.form.get(FORM_REGISTER[0]).strip()
-        input_password = request.form.get(FORM_REGISTER[1]).strip()
-        input_confirmation = request.form.get(FORM_REGISTER[2]).strip()
-        # check for dirty input
-        escape_name = escape(input_name)
-        messages = check_login_form(input_name, input_password, input_confirmation)
+    elif form.validate_on_submit():
+        messages = check_form(form.name.data, form.password.data, form.confirmation.data)
 
-        user = None
         if not messages:
             status = Statuses.query.first()
-            user = Users(login=escape_name, get_status=status, password=hash_password(input_password, input_name))
+            user = Users(login=escape(form.name.data), get_status=status, \
+                password=hash_password(form.password.data, form.name.data))
             DB.session.add(user)
             try:
                 DB.session.commit()
@@ -484,15 +503,15 @@ def register():
         if messages:
             for message in messages:
                 flash(message)
-            template_form = FORM_REGISTER
             code = 400
         else:
             session['user'] = {'name': user.login, 'status': user.get_status.status}
-            flash(f"Hello, {escape_name}!")
+            flash(f"Hello, {user.login}!")
+            form = None
             code = 200
 
     return render_template(
-        "register.html", nav=FOOTER, form=template_form,
+        "register.html", nav=FOOTER, form=form,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
         pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
         usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN
@@ -569,37 +588,3 @@ def board(board, page=1):
 
 if __name__ == '__main__':
     app.run()
-
-"""
-@app.route("/<int:id>")
-def show_id(id):
-    return f"ID: {id}"
-
-@app.route("/<path:subpath>")
-def show_subpath(subpath):
-    return f"Path: {escape(subpath)}"
-
-@app.route("/projects/")
-def projects():
-    return "The project page"
-
-@app.route('/about')
-def about():
-    return 'The about page'
-
-@app.route('/user/<username>')
-def profile(username):
-    return f'{escape(username)}\'s profile'
-
-@app.errorhandler(404)
-def page_not_found(error):
-    return "404"
-
-with app.test_request_context():
-    print("hello")
-
-with app.test_request_context("/"):
-    assert request.path == '/'
-    assert request.method == 'GET'
-    print("OK index")
-"""
