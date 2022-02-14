@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField, StringField, PasswordField, HiddenField, TextAreaField, validators
 from wtforms.validators import DataRequired, Length, EqualTo
 
@@ -67,9 +68,13 @@ class MakeThread(FlaskForm):
         Length(max=DEFAULT_LENGTH, message=f"Theme is {DEFAULT_LENGTH} symbols max.")
     ])
     password = PasswordField("Password", [
-        Length(max=ANON_PASSWORD_LENGTH, message=f"Theme is {ANON_PASSWORD_LENGTH} symbols max.")
+        Length(min=USER_PASSWORD_MIN, max=ANON_PASSWORD_LENGTH, \
+            message=f"Theme is {ANON_PASSWORD_LENGTH} symbols max.")
     ])
     text = TextAreaField("Text")
+    file1 = FileField("File1")
+    file2 = FileField("File2")
+    file3 = FileField("File3")
     submit = SubmitField()
 
 

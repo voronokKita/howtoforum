@@ -21,6 +21,82 @@ $min_width: 340px;
 }
 // </list of pages>
 
+// <forms>
+.create_new_thread {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  margin: 14px 0 20px 0;
+
+  //border: 1px solid red;
+}
+.thread_form {
+  width: 60%;
+  min-width: 350px;
+  border-bottom: 1px solid green;
+}
+.form_theme {
+  padding: 1px 4px;
+  width: 200px;
+  height: 25px;
+  border: 1px solid gray;
+  border-radius: 1%;
+  font-size: 15px;
+}
+.form_post {
+  width: 60px;
+  height: 25px;
+  background-color: rgb(205, 221, 136);
+  border: 1px solid rgb(205, 221, 136);
+  border-radius: 2%;
+  font-size: 15px;
+}
+.form_post:hover {
+  border: 1px solid green;
+  background-color: rgb(163, 221, 136);
+  color: green;
+  cursor: pointer;
+}
+.form_text {
+  width: 90%;
+  min-width: 350px;
+  max-width: 800px;
+  height: 100px;
+  padding: 6px 10px;
+  margin-top: 5px;
+  border: 1px solid gray;
+  border-radius: 1%;
+}
+.form_file {
+  margin-bottom: 5px;
+  line-height: 0;
+  font-size: 9px;
+}
+.form_password {
+  padding: 1px 4px;
+  width: 200px;
+  height: 25px;
+  border: 1px solid gray;
+  border-radius: 1%;
+  font-size: 15px;
+}
+.thread_help {
+  margin: 8px 0;
+  font-size: 10px;
+}
+.thread_help * {
+  line-height: 1;
+}
+.thread_help_h * {
+  font-size: 14px;
+}
+.thread_help_t {
+  margin-left: 11px;
+  list-style: circle;
+  font-size: 12px;
+}
+// </forms>
+
 // <thread>
 .thread_section {
   width: 100%;
@@ -100,6 +176,7 @@ $min_width: 340px;
   flex-flow: column nowrap;
   align-items: center;
 }
+.post_file_container * {line-height: 1; padding-bottom: 2px;}
 .post_file_name {font-size: 10px; color: rgb(97, 97, 97);}
 .post_file_name, .post_file_img {flex: 0 0 fit-content; height: fit-content;}
 .post_file_img > img {max-width: 200px; max-height: 180px;}

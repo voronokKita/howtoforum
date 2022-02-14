@@ -1,7 +1,9 @@
 from flask import url_for, request, session, redirect, render_template, flash
-from markupsafe import escape
 
 from sqlalchemy import exc
+
+from markupsafe import escape
+from werkzeug.utils import secure_filename
 
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
@@ -9,8 +11,10 @@ from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, 
 from helpers import check_form, hash_password, fill_the_database, fill_board
 from constants import *
 
+# TODO: file handling
 # TODO: transactions and ACID
-# TODO pep8
+# TODO: pep8
+# TODO: color theme
 
 
 @app.before_first_request
@@ -163,13 +167,16 @@ def register():
 @app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
     board = Boards.query.filter(Boards.short == escape(board)).first()
+
     if not board:
         return redirect(url_for('index')), 303
     elif page <= 0:
         return redirect(url_for('board', board=board.short, page=1)), 303
-    else:
-        form_thread = MakeThread()
-        form_post = MakePost()
+
+    form_thread = MakeThread()
+
+    if form_thread.validate_on_submit():
+        pass
 
     start = page * 10 - 10
     stop = page * 10
@@ -189,7 +196,9 @@ def board(board, page=1):
         short_name=board.short, long_name=board.name,
         description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total,
-        form_thread=form_thread, form_post=form_post
+        pass_min=USER_PASSWORD_MIN, pass_max=ANON_PASSWORD_LENGTH,
+        theme_min=DEFAULT_LENGTH,
+        form_thread=form_thread
     ), 200
 
 
