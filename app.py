@@ -16,6 +16,7 @@ from constants import *
 # TODO: pep8
 # TODO: color theme
 # TODO: clear and simplify input
+# TODO: style posts width
 
 
 @app.before_first_request
@@ -177,7 +178,7 @@ def board(board, page=1):
         base_url = f"/board/{board.short}/"
 
     # <WIP>
-    if form_thread.validate_on_submit():
+    if form_thread.validate_on_submit():  # TODO: abstract in another place
         date = datetime.datetime.now()
 
         t = Threads(get_board=board, date=date, updated=date)
@@ -204,14 +205,31 @@ def board(board, page=1):
             user = Users.query.filter(Users.login == user['name']).first()
             user.posts.append(p)
 
-        file1 = form_thread.file1.data
-        print(file1)
-        file1 = None
-        file2 = form_thread.file2.data
-        file3 = form_thread.file3.data
-        if not file1 and not file2 and not file3:  # TODO
+        files = [form_thread.file1.data, form_thread.file2.data, form_thread.file3.data]
+        if not files[0] and not files[1] and not files[2]:
             file = Resources.query.filter(Resources.resource == "054634534.jpg").first()
             p.files.append(file)
+        else:
+            files = [f for f in files if f is not None]
+            for file in files:  # TODO file size
+                mime = file.mimetype.split("/")
+                if mime[0] == "image":
+                    file_type = "image"
+                elif mime[0] == "text" or mime[1] in ANOTHER_TEXT_TYPES or "vnd" in mime[1]:
+                    file_type = "text"
+                else:
+                    file_type = "other"
+
+                filename = secure_filename(file.filename)
+                tmp_file_location = FILE_STORAGE / "tmp" / filename
+                file.save(tmp_file_location)
+
+                f_type = Resource_types.query.filter_by(type=file_type).first()
+                f = Resources(get_type=f_type, resource=filename)
+                if user:
+                    user.resources.append(f)
+                p.files.append(f)
+                tmp_file_location.rename(FILE_STORAGE / file_type / filename)
 
         t.post_count += 1
         board.thread_count += 1
@@ -241,7 +259,7 @@ def board(board, page=1):
         description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total,
         pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH,
-        form_thread=form_thread
+        filesize=MAX_FILE_SIZE, form_thread=form_thread
     ), 200
 
 

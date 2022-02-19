@@ -31,6 +31,7 @@
               <li class='thread_help_t'>both theme and password are optional</li>
               <li class='thread_help_t'>theme length is up to {{ theme_max }} symbols</li>
               <li class='thread_help_t'>password is up to {{ pass_max }} symbols</li>
+              <li class='thread_help_t'>file size must be less than {{ filesize }}MB</li>
               {% for field, errors in form_thread.errors.items() %}
                 {% for error in errors %}
                   <li class='thread_error'>{{ error }}</li>

@@ -36,7 +36,7 @@ class Resource_types(db.Model):
     __tablename__ = 'resource_types'
 
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False)
+    type = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False) # TODO index, constants
 
     resources = db.relationship('Resources', backref='get_type')
 
