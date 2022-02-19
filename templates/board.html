@@ -13,7 +13,7 @@
       {% include "/layouts/list_of_pages.html" %}
 
       <section class='create_new_thread'>
-        <form action='/' method='POST' enctype='multipart/form-data' class='thread_form'>
+        <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='thread_form'>
           {{ form_thread.csrf_token }}
           <ul>
             <li>
@@ -24,13 +24,18 @@
             <li>{{ form_thread.file1(class='form_file') }}</li>
             <li>{{ form_thread.file2(class='form_file') }}</li>
             <li>{{ form_thread.file3(class='form_file') }}</li>
-            <li>{{ form_thread.password(placeholder="Password", pattern=pass_pattern, class='form_password') }}</li>
+            <li>{{ form_thread.password(placeholder="Password", class='form_password') }}</li>
 
             <div class='thread_help'>
               <li class='thread_help_h'><h6>Help</h6></li>
               <li class='thread_help_t'>both theme and password are optional</li>
-              <li class='thread_help_t'>theme length is up to {{ theme_min }} symbols</li>
-              <li class='thread_help_t'>password is from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
+              <li class='thread_help_t'>theme length is up to {{ theme_max }} symbols</li>
+              <li class='thread_help_t'>password is up to {{ pass_max }} symbols</li>
+              {% for field, errors in form_thread.errors.items() %}
+                {% for error in errors %}
+                  <li class='thread_error'>{{ error }}</li>
+                {% endfor %}
+              {% endfor %}
             </div>
           </ul>
         </form>

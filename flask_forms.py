@@ -68,8 +68,8 @@ class MakeThread(FlaskForm):
         Length(max=DEFAULT_LENGTH, message=f"Theme is {DEFAULT_LENGTH} symbols max.")
     ])
     password = PasswordField("Password", [
-        Length(min=USER_PASSWORD_MIN, max=ANON_PASSWORD_LENGTH, \
-            message=f"Theme is {ANON_PASSWORD_LENGTH} symbols max.")
+        Length(max=ANON_PASSWORD_LENGTH, \
+            message=f"Password is {ANON_PASSWORD_LENGTH} symbols max.")
     ])
     text = TextAreaField("Text")
     file1 = FileField("File1")

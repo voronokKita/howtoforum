@@ -8,13 +8,14 @@ from werkzeug.utils import secure_filename
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
-from helpers import check_form, hash_password, fill_the_database, fill_board
+from helpers import check_form, hash_password, fill_the_database, fill_board  # ? fix
 from constants import *
 
 # TODO: file handling
 # TODO: transactions and ACID
 # TODO: pep8
 # TODO: color theme
+# TODO: clear and simplify input
 
 
 @app.before_first_request
@@ -163,41 +164,83 @@ def register():
     ), code
 
 
-@app.route("/board/<board>/")
+@app.route("/board/<board>/", methods=['GET', 'POST'])
 @app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
     board = Boards.query.filter(Boards.short == escape(board)).first()
-
     if not board:
         return redirect(url_for('index')), 303
     elif page <= 0:
         return redirect(url_for('board', board=board.short, page=1)), 303
+    else:
+        form_thread = MakeThread()
+        base_url = f"/board/{board.short}/"
 
-    form_thread = MakeThread()
-
+    # <WIP>
     if form_thread.validate_on_submit():
-        pass
+        date = datetime.datetime.now()
 
+        t = Threads(get_board=board, date=date, updated=date)
+        db.session.add(t)
+        db.session.commit()
+
+        t = Threads.query.filter(Threads.board_id == board.id, \
+                Threads.post_count == 0, Threads.date == date).first()
+
+        user = session.get('user')
+        password = None
+        if not user and form_thread.password.data:
+            password = hash_password(form_thread.password.data)
+
+        theme = None
+        if form_thread.theme.data and len(form_thread.theme.data) <= DEFAULT_LENGTH:
+            theme = form_thread.theme.data
+
+        p = Posts(get_thread=t, password=password, date=date, theme=theme, \
+                text=form_thread.text.data, has_files=True)
+        db.session.add(p)
+
+        if user:
+            user = Users.query.filter(Users.login == user['name']).first()
+            user.posts.append(p)
+
+        file1 = form_thread.file1.data
+        print(file1)
+        file1 = None
+        file2 = form_thread.file2.data
+        file3 = form_thread.file3.data
+        if not file1 and not file2 and not file3:  # TODO
+            file = Resources.query.filter(Resources.resource == "054634534.jpg").first()
+            p.files.append(file)
+
+        t.post_count += 1
+        board.thread_count += 1
+        db.session.commit()
+
+        #</WIP>
+
+    # generete a page content
     start = page * 10 - 10
     stop = page * 10
-    threads_on_page = Threads.query.filter(Threads.board_id == board.id). \
-        order_by(Threads.updated.desc()).slice(start, stop).all()
+    threads_on_page = Threads.query.filter(Threads.board_id == board.id, Threads.post_count > 0). \
+                        order_by(Threads.updated.desc()).slice(start, stop).all()
     if not threads_on_page:
-        return redirect(url_for('board', board=board.short, page=1)), 303
+        if page != 1:
+            return redirect(url_for('board', board=board.short, page=1)), 303
+        else:
+            return redirect(url_for('index')), 303
+    else:
+        pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
+        pages_total = [i for i in range(1, pages_total + 1)]
 
-    pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
-    pages_total = [i for i in range(1, pages_total + 1)]
-    base_url = f"/board/{board.short}/"
-
-    threads_with_posts = fill_board(threads_on_page)
+        threads_with_posts = fill_board(threads_on_page)
 
     return render_template(
         "board.html", nav=FOOTER, thread_count=board.thread_count,
         short_name=board.short, long_name=board.name,
         description=board.description, base_url=base_url,
         threads=threads_with_posts, pages=pages_total,
-        pass_min=USER_PASSWORD_MIN, pass_max=ANON_PASSWORD_LENGTH,
-        theme_min=DEFAULT_LENGTH,
+        pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH,
         form_thread=form_thread
     ), 200
 

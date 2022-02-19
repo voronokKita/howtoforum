@@ -26,7 +26,7 @@ def hash_password(password, salt=""):
 
 
 def fill_board(threads_on_page):
-    # fill threads with data and posts
+    """ fill threads with data and posts """
     threads_with_posts = []
     for thread in threads_on_page:
         op = thread.posts[0]

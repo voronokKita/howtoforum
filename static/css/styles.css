@@ -296,111 +296,116 @@ footer {
                         list-style: circle;
                         font-size: 12px; }
 
-                        .thread_section {
-                          width: 100%;
-                          min-width: 340px;
-                          margin-bottom: 30px;
-                          border: 1px solid #41f841;
-                          border-style: none none solid none; }
+                        .thread_error {
+                          margin-top: 6px;
+                          font-size: 14px;
+                          color: red; }
 
-                          .thread_header {
-                            width: fit-content;
-                            background-color: #8d8;
-                            border: 1px solid #75ff75; }
+                          .thread_section {
+                            width: 100%;
+                            min-width: 340px;
+                            margin-bottom: 30px;
+                            border: 1px solid #41f841;
+                            border-style: none none solid none; }
 
-                            .thread_header * {
-                              display: inline;
+                            .thread_header {
                               width: fit-content;
-                              padding: 0 6px 0 1px; }
+                              background-color: #8d8;
+                              border: 1px solid #75ff75; }
 
-                              .expand {
-                                font-size: 15px;
-                                color: #555;
-                                margin-bottom: 9px;
-                                margin-left: 10px; }
+                              .thread_header * {
+                                display: inline;
+                                width: fit-content;
+                                padding: 0 6px 0 1px; }
 
-                                .expand > a {
+                                .expand {
                                   font-size: 15px;
-                                  color: #3b3d61; }
+                                  color: #555;
+                                  margin-bottom: 9px;
+                                  margin-left: 10px; }
 
-                                  .expand > a:hover {
-                                    color: #3c4194; }
+                                  .expand > a {
+                                    font-size: 15px;
+                                    color: #3b3d61; }
 
-                                    .post {
-                                      overflow: hidden;
-                                      width: fit-content;
-                                      height: fit-content;
-                                      min-width: 340px;
-                                      margin-bottom: 9px;
-                                      background-color: #daf0d6;
-                                      border-radius: 2%; }
+                                    .expand > a:hover {
+                                      color: #3c4194; }
 
-                                      #op {
-                                        background-color: #c6eec6;
-                                        border-radius: 0 2% 2% 2%; }
+                                      .post {
+                                        overflow: hidden;
+                                        width: fit-content;
+                                        height: fit-content;
+                                        min-width: 340px;
+                                        margin-bottom: 9px;
+                                        background-color: #daf0d6;
+                                        border-radius: 2%; }
 
-                                        .post_header {
-                                          width: fit-content;
-                                          min-width: 340px;
-                                          padding: 0 6px 0 2px; }
+                                        #op {
+                                          background-color: #c6eec6;
+                                          border-radius: 0 2% 2% 2%; }
 
-                                          .post_header * {
-                                            display: inline;
-                                            width: fit-content; }
+                                          .post_header {
+                                            width: fit-content;
+                                            min-width: 340px;
+                                            padding: 0 6px 0 2px; }
 
-                                            .post_theme {
-                                              color: orangered; }
+                                            .post_header * {
+                                              display: inline;
+                                              width: fit-content; }
 
-                                              .post_author {
-                                                color: green; }
+                                              .post_theme {
+                                                color: orangered; }
 
-                                                .post_date {
-                                                  font-size: 15px; }
+                                                .post_author {
+                                                  color: green; }
 
-                                                  .post_id {
-                                                    color: olive; }
+                                                  .post_date {
+                                                    font-size: 15px; }
 
-                                                    .post_content {
-                                                      width: auto;
-                                                      min-width: 340px; }
+                                                    .post_id {
+                                                      color: olive; }
 
-                                                      .post_files_container {
-                                                        float: left;
-                                                        margin-right: 10px; }
+                                                      .post_content {
+                                                        width: auto;
+                                                        min-width: 340px; }
 
-                                                        .post_files_list {
-                                                          display: flex;
-                                                          flex-flow: row wrap; }
+                                                        .post_files_container {
+                                                          float: left;
+                                                          margin-right: 10px; }
 
-                                                          .post_file_container {
-                                                            flex: 0 0 fit-content;
-                                                            padding: 2px;
+                                                          .post_files_list {
                                                             display: flex;
-                                                            flex-flow: column nowrap;
-                                                            align-items: center; }
+                                                            flex-flow: row wrap; }
 
-                                                            .post_file_container * {
-                                                              line-height: 1;
-                                                              padding-bottom: 2px; }
+                                                            .post_file_container {
+                                                              flex: 0 0 fit-content;
+                                                              padding: 2px;
+                                                              display: flex;
+                                                              flex-flow: column nowrap;
+                                                              align-items: center; }
 
-                                                              .post_file_name {
-                                                                font-size: 10px;
-                                                                color: #616161; }
+                                                              .post_file_container * {
+                                                                line-height: 1;
+                                                                padding-bottom: 2px; }
 
-                                                                .post_file_name, .post_file_img {
-                                                                  flex: 0 0 fit-content;
-                                                                  height: fit-content; }
+                                                                .post_file_name {
+                                                                  font-size: 10px;
+                                                                  color: #616161; }
 
-                                                                  .post_file_img > img {
-                                                                    max-width: 200px;
-                                                                    max-height: 180px; }
+                                                                  .post_file_name, .post_file_img {
+                                                                    flex: 0 0 fit-content;
+                                                                    height: fit-content; }
 
-                                                                    .post_text {
-                                                                      min-width: 340px;
-                                                                      padding: 4px 4px 10px 10px;
-                                                                      margin-left: 10px; }
+                                                                    .post_file_img > img {
+                                                                      max-width: 200px;
+                                                                      max-height: 180px; }
 
-                                                                      @media (max-width: 900px) {
-                                                                        .post_text {
-                                                                          max-width: 600px;   }
+                                                                      .post_text {
+                                                                        min-width: 340px;
+                                                                        padding: 4px 4px 10px 10px;
+                                                                        margin-left: 10px; }
+
+                                                                        @media (max-width: 900px) {
+                                                                          .post_text {
+                                                                            max-width: 600px;   }
 }
