@@ -1,4 +1,8 @@
+from markupsafe import escape
+from werkzeug.utils import secure_filename
+
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
+
 from constants import *
 
 
@@ -23,6 +27,66 @@ def hash_password(password, salt=""):
         password = hashlib.sha3_224(password.encode()).hexdigest()
         s = password + GLOBAL_SALT
         return hashlib.sha3_224(s.encode()).hexdigest()
+
+
+def make_a_post(form, board, user):
+    """ makes a new thread or a new post, saves files """
+    date = datetime.datetime.now()
+
+    thread = Threads(get_board=board, date=date, updated=date)
+    db.session.add(thread)
+    db.session.commit()
+    thread = Threads.query.filter(Threads.board_id == board.id, \
+                Threads.post_count == 0, Threads.date == date).first()
+
+    password = None
+    if not user and form.password.data:
+        password = hash_password(form.password.data)
+
+    theme = None
+    if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH:
+        theme = form.theme.data
+
+    post = Posts(get_thread=thread, password=password, date=date, theme=theme, \
+            text=form.text.data, has_files=True)
+    db.session.add(post)
+
+    if user:
+        user = Users.query.filter_by(login=user['name']).first()
+        user.posts.append(post)
+    db.session.commit()
+
+    files = [form.file1.data, form.file2.data, form.file3.data]
+    if not files[0] and not files[1] and not files[2]:
+        file = Resources.query.filter_by(resource="054634534.jpg").first()
+        post.files.append(file)
+    else:
+        files = [f for f in files if f is not None]
+        for file in files:  # TODO file size
+            filename = secure_filename(file.filename)
+            tmp_file_location = FILE_STORAGE / "tmp" / filename
+            file.save(tmp_file_location)
+
+            mime = file.mimetype.split("/")
+            if mime[0] == "image":
+                resource_type = "image"
+            elif mime[0] == "text" or mime[1] in ANOTHER_TEXT_TYPES or "vnd" in mime[1]:
+                resource_type = "text"
+            else:
+                resource_type = "other"
+            resource_type = Resource_types.query.filter_by(type=resource_type).first()
+
+            file = Resources(get_type=resource_type, resource=filename)
+            if user:
+                user.resources.append(file)
+            post.files.append(file)
+            db.session.commit()
+            tmp_file_location.rename(FILE_STORAGE / resource_type.type / file.resource)
+
+    thread.post_count += 1
+    board.thread_count += 1
+    db.session.commit()
+    return board
 
 
 def fill_board(threads_on_page):

@@ -8,10 +8,10 @@ from werkzeug.utils import secure_filename
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
-from helpers import check_form, hash_password, fill_the_database, fill_board  # ? fix
+from helpers import check_form, hash_password, fill_the_database, make_a_post, fill_board  # ? fix
 from constants import *
 
-# TODO: file handling
+# TODO: file size
 # TODO: transactions and ACID
 # TODO: pep8
 # TODO: color theme
@@ -177,65 +177,9 @@ def board(board, page=1):
         form_thread = MakeThread()
         base_url = f"/board/{board.short}/"
 
-    # <WIP>
-    if form_thread.validate_on_submit():  # TODO: abstract in another place
-        date = datetime.datetime.now()
-
-        t = Threads(get_board=board, date=date, updated=date)
-        db.session.add(t)
-        db.session.commit()
-
-        t = Threads.query.filter(Threads.board_id == board.id, \
-                Threads.post_count == 0, Threads.date == date).first()
-
+    if form_thread.validate_on_submit():
         user = session.get('user')
-        password = None
-        if not user and form_thread.password.data:
-            password = hash_password(form_thread.password.data)
-
-        theme = None
-        if form_thread.theme.data and len(form_thread.theme.data) <= DEFAULT_LENGTH:
-            theme = form_thread.theme.data
-
-        p = Posts(get_thread=t, password=password, date=date, theme=theme, \
-                text=form_thread.text.data, has_files=True)
-        db.session.add(p)
-
-        if user:
-            user = Users.query.filter(Users.login == user['name']).first()
-            user.posts.append(p)
-
-        files = [form_thread.file1.data, form_thread.file2.data, form_thread.file3.data]
-        if not files[0] and not files[1] and not files[2]:
-            file = Resources.query.filter(Resources.resource == "054634534.jpg").first()
-            p.files.append(file)
-        else:
-            files = [f for f in files if f is not None]
-            for file in files:  # TODO file size
-                mime = file.mimetype.split("/")
-                if mime[0] == "image":
-                    file_type = "image"
-                elif mime[0] == "text" or mime[1] in ANOTHER_TEXT_TYPES or "vnd" in mime[1]:
-                    file_type = "text"
-                else:
-                    file_type = "other"
-
-                filename = secure_filename(file.filename)
-                tmp_file_location = FILE_STORAGE / "tmp" / filename
-                file.save(tmp_file_location)
-
-                f_type = Resource_types.query.filter_by(type=file_type).first()
-                f = Resources(get_type=f_type, resource=filename)
-                if user:
-                    user.resources.append(f)
-                p.files.append(f)
-                tmp_file_location.rename(FILE_STORAGE / file_type / filename)
-
-        t.post_count += 1
-        board.thread_count += 1
-        db.session.commit()
-
-        #</WIP>
+        board = make_a_post(form_thread, board, user)
 
     # generete a page content
     start = page * 10 - 10
@@ -253,13 +197,12 @@ def board(board, page=1):
 
         threads_with_posts = fill_board(threads_on_page)
 
-    return render_template(
-        "board.html", nav=FOOTER, thread_count=board.thread_count,
-        short_name=board.short, long_name=board.name,
-        description=board.description, base_url=base_url,
-        threads=threads_with_posts, pages=pages_total,
-        pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH,
-        filesize=MAX_FILE_SIZE, form_thread=form_thread
+    return render_template("board.html",
+        nav=FOOTER, thread_count=board.thread_count, short_name=board.short,
+        long_name=board.name, description=board.description, base_url=base_url,
+        threads=threads_with_posts, pages=pages_total, pass_max=ANON_PASSWORD_LENGTH,
+        theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
+        form_thread=form_thread
     ), 200
 
 
