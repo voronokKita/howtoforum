@@ -3,11 +3,13 @@ import datetime
 import secrets
 import hashlib
 import pathlib
+import string
+import random
 from tempfile import mkdtemp
 from pprint import pprint
 from time import sleep
 
-from markupsafe import escape
+from markupsafe import Markup, escape
 from werkzeug.utils import secure_filename
 
 
@@ -37,11 +39,12 @@ POSTS_PER_THREAD = 5
 USERNAME_MIN = 2
 USERNAME_LENGTH = 20
 DEFAULT_LENGTH = 30
+DB_POST_THEME_EXTENDED = 100
 USER_PASSWORD_MIN = 6
 USER_PASSWORD_LENGTH = 200
 ANON_PASSWORD_LENGTH = 100
-RESOURCE_LENGTH = 200
-MAX_FILE_SIZE = 10
+RESOURCE_LENGTH = 100
+MAX_FILE_SIZE = 30
 
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
 TIME_FORMAT = '%A, %-d day of %B %Y | %-H:%M:%S'

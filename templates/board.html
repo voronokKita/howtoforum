@@ -11,7 +11,6 @@
     <div class='boards_container'>
 
       {% include "/layouts/list_of_pages.html" %}
-
       <section class='create_new_thread'>
         <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='thread_form'>
           {{ form_thread.csrf_token }}
@@ -24,7 +23,9 @@
             <li>{{ form_thread.file1(class='form_file') }}</li>
             <li>{{ form_thread.file2(class='form_file') }}</li>
             <li>{{ form_thread.file3(class='form_file') }}</li>
-            <li>{{ form_thread.password(placeholder="Password", class='form_password') }}</li>
+            <li {% if session['user'] %}class='password_hidden'{% endif %}>
+              {{ form_thread.password(placeholder="Password", class='form_password') }}
+            </li>
 
             <div class='thread_help'>
               <li class='thread_help_h'><h6>Help</h6></li>

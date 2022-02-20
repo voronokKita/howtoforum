@@ -112,8 +112,8 @@ class Posts(db.Model):
                 default=None)
     password = db.Column(db.String(ANON_PASSWORD_LENGTH), default=None)
     date = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
-    theme = db.Column(db.String(DEFAULT_LENGTH), default=None)
-    text = db.Column(db.Text, default="&nbsp;")
+    theme = db.Column(db.String(DB_POST_THEME_EXTENDED), default=None)
+    text = db.Column(db.Text, default=" ")
     has_files = db.Column(db.Boolean, default=False, nullable=False)
 
     files = db.relationship('Resources', secondary=attachments, backref='get_posts')
@@ -126,7 +126,7 @@ class Resources(db.Model):
     __tablename__ = 'resources'
 
     id = db.Column(db.Integer, primary_key=True, index=True)
-    resource = db.Column(db.String(RESOURCE_LENGTH), nullable=False)
+    resource = db.Column(db.String(RESOURCE_LENGTH), unique=True, nullable=False)
     type = db.Column(db.Integer, \
             db.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), \
             nullable=False)

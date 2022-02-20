@@ -1,5 +1,7 @@
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 
+from sqlalchemy.exc import IntegrityError
+
 from constants import *
 
 
@@ -14,7 +16,7 @@ def hash_password(password, salt=""):
         return hashlib.sha3_224(s.encode()).hexdigest()
 
 
-def make_a_post(form, board, user, thread=None):  # TODO exceptions, IntegrityError
+def make_a_post(form, board, user, thread=None):
     """ makes a new thread or a new post, saves files """
     date = datetime.datetime.now()
 
@@ -29,10 +31,10 @@ def make_a_post(form, board, user, thread=None):  # TODO exceptions, IntegrityEr
     if not user and form.password.data:
         password = hash_password(form.password.data)
     if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH:
-        theme = form.theme.data
+        theme = escape(form.theme.data)
 
     post = Posts(get_thread=thread, password=password, date=date, theme=theme, \
-            text=form.text.data, has_files=True)
+            text=escape(form.text.data), has_files=True)
     db.session.add(post)
 
     if user:
@@ -42,12 +44,12 @@ def make_a_post(form, board, user, thread=None):  # TODO exceptions, IntegrityEr
 
     files = [form.file1.data, form.file2.data, form.file3.data]
     if not files[0] and not files[1] and not files[2]:
-        file = Resources.query.filter_by(resource="054634534.jpg").first()
+        file = Resources.query.filter_by(id=1).first()
         post.files.append(file)
 
     else:
         files = [f for f in files if f is not None]
-        for file in files:  # TODO file size
+        for file in files:
             filename = secure_filename(file.filename)
             tmp_file_location = FILE_STORAGE / "tmp" / filename
             file.save(tmp_file_location)
@@ -61,7 +63,16 @@ def make_a_post(form, board, user, thread=None):  # TODO exceptions, IntegrityEr
                 resource_type = FILE_TYPE_OTHER
             resource_type = Resource_types.query.filter_by(type=resource_type).first()
 
+            while True:
+                duplicate = Resources.query.filter_by(resource=filename).first()
+                if duplicate:
+                    extension = pathlib.Path(filename).suffix
+                    filename = ''.join(random.choices(string.ascii_letters + string.digits, k=15))
+                    filename += extension
+                else:
+                    break
             file = Resources(get_type=resource_type, resource=filename)
+
             if user:
                 user.resources.append(file)
             post.files.append(file)
@@ -81,9 +92,9 @@ def generete_page(page, board):
 
     if not threads_on_page:
         if page != 1:
-            raise PageDoesNotExistError
+            raise PageDoesNotExistError("error")
         else:
-            raise BoardIsEmptyError
+            raise BoardIsEmptyError("error")
     else:
         pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
         pages_total = [i for i in range(1, pages_total + 1)]
@@ -128,8 +139,9 @@ def fill_board(threads_on_page):
                     p = f"/static/data/{f.get_type.type}/"
                     files.append({'name': f.resource, 'path': p})
 
+            theme = Markup(post.theme) if post.theme else None
             p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
-                 'author': username, 'theme': post.theme, 'text': post.text, 'files': files}
+                 'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
             new_list.append(p)
 
         thread['posts'] = new_list
@@ -191,7 +203,7 @@ def fill_the_database():
         thread_id = 1
         for board in boards:
             i = 1
-            while i <= 5:
+            while i <= 142:
                 print(f"db: makes thread {thread_id} on board {board.short}")
                 new_thread = Threads(id=thread_id, post_count=2, get_board=board)
                 db.session.add(new_thread)

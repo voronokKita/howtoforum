@@ -8,11 +8,9 @@ from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, 
 from constants import *
 import helpers
 
-# TODO: file size
 # TODO: transactions and ACID
 # TODO: pep8
 # TODO: color theme
-# TODO: clear and simplify input
 # TODO: style posts width
 
 
@@ -174,16 +172,21 @@ def board(board, page=1):
 
     if form_thread.validate_on_submit():
         user = session.get('user')
-        board = helpers.make_a_post(form_thread, board, user)
+        try:
+            board = helpers.make_a_post(form_thread, board, user)
+        except IntegrityError as error:  # TODO
+            return f"Data already exists. {error}"
+        except SQLAlchemyError as error:
+            return f"Something went terrible wrong... {error}"
 
     try:
         pages_total, threads_with_posts = helpers.generete_page(page, board)
     except PageDoesNotExistError:
-        redirect(url_for('board', board=board.short, page=1)), 303
+        return redirect(url_for('board', board=board.short, page=1)), 303
     except BoardIsEmptyError:
-        redirect(url_for('index')), 303
+        return redirect(url_for('index')), 303
 
-    return render_template("board.html",  # TODO user don't ned to see a password field
+    return render_template("board.html",
         nav=FOOTER, form_thread=form_thread, base_url=base_url,
         thread_count=board.thread_count, short_name=board.short,
         long_name=board.name, description=board.description,
