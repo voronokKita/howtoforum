@@ -17,9 +17,9 @@
       {% if form %}
         <form action="/user/{{ session.user.name }}" method='POST' class='login_form'>
           {{ form.csrf_token }}
-          {{ form.old_password(placeholder="Old password", autofocus=True, pattern=pass_pattern, class='login_input') }}
-          {{ form.new_password(placeholder="New password", pattern=pass_pattern, class='login_input') }}
-          {{ form.confirmation(placeholder="Repeat password", pattern=pass_pattern, class='login_input') }}
+          {{ form.old_password(placeholder="Old password", autofocus=True, class='login_input') }}
+          {{ form.new_password(placeholder="New password", class='login_input') }}
+          {{ form.confirmation(placeholder="Repeat password", class='login_input') }}
           {{ form.submit(class='login_submit') }}
         </form>
       {% endif %}

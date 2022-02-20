@@ -2,6 +2,8 @@ from flask import Flask
 
 from flask_session import Session
 
+from flask_wtf.csrf import CSRFProtect
+
 from flask_assets import Environment, Bundle
 
 from constants import *
@@ -16,7 +18,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME = datetime.timedelta(days=1),
     TEMPLATES_AUTO_RELOAD = True,
     UPLOAD_FOLDER = FILE_STORAGE / "tmp",
-    MAX_CONTENT_PATH = 50000000
+    MAX_CONTENT_LENGTH = MAX_FILE_SIZE * 1024 * 1024
 )
 
 # <sessions>
@@ -27,6 +29,10 @@ app.config.update(
 )
 Session(app)
 # </sessions>
+
+# <flask-wtf>
+csrf = CSRFProtect(app)
+# </flask-wtf>
 
 # <scss>
 scss_list = [

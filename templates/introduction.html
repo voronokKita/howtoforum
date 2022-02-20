@@ -18,7 +18,7 @@
         <form action='/{{ request.url_rule.endpoint }}' method='POST' class='login_form'>
           {{ form.csrf_token }}
           {{ form.name(placeholder="Name", autofocus=True, pattern=usr_pattern, class='login_input') }}
-          {{ form.password(placeholder="Password", pattern=pass_pattern, class='login_input') }}
+          {{ form.password(placeholder="Password", class='login_input') }}
           {{ form.submit(class='login_submit') }}
         </form>
       {% endif %}

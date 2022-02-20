@@ -6,12 +6,6 @@ from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
 
 from constants import *
 
-M_WRONG = "Wrong input."
-M_EMPTY = "Empty input."
-M_USERNAME_LEN = "The username length doesn't match."
-M_PASSWORD_LEN = "The password length doesn't match."
-M_PASSWORD_CONFIRM = "The password confirmation doesn't match."
-
 
 class LoginForm(FlaskForm):
     name = StringField("Name", [
@@ -65,13 +59,8 @@ class RegisterForm(FlaskForm):
 
 
 class MakeThread(FlaskForm):
-    theme = StringField("Theme", [
-        Length(max=DEFAULT_LENGTH, message=f"Theme is {DEFAULT_LENGTH} symbols max.")
-    ])
-    password = PasswordField("Password", [
-        Length(max=ANON_PASSWORD_LENGTH, \
-            message=f"Password is {ANON_PASSWORD_LENGTH} symbols max.")
-    ])
+    theme = StringField("Theme", [Length(max=DEFAULT_LENGTH, message=M_POST_THEME_LEN)])
+    password = PasswordField("Password", [Length(max=ANON_PASSWORD_LENGTH, message=M_POST_PASSWORD_LEN)])
     text = TextAreaField("Text")
     file1 = FileField("File1")
     file2 = FileField("File2")
@@ -80,4 +69,4 @@ class MakeThread(FlaskForm):
 
 
 class MakePost(MakeThread):
-    thread_id = HiddenField("Thread", [DataRequired(message=M_EMPTY)])
+    thread_id = HiddenField("Thread", [DataRequired(message=M_WRONG)])

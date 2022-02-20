@@ -1,15 +1,12 @@
 from flask import url_for, request, session, redirect, render_template, flash
 
-from sqlalchemy import exc
-
-from markupsafe import escape
-from werkzeug.utils import secure_filename
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
-from helpers import check_form, hash_password, fill_the_database, make_a_post, fill_board  # ? fix
 from constants import *
+import helpers
 
 # TODO: file size
 # TODO: transactions and ACID
@@ -21,7 +18,7 @@ from constants import *
 
 @app.before_first_request
 def before_first_request():
-    # fill_the_database()
+    helpers.fill_the_database()
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
 
@@ -42,14 +39,16 @@ def introduction():
         return redirect(url_for('index')), 303
 
     elif form.validate_on_submit():
-        messages = check_form(form.name.data, form.password.data)
+        messages = []
+        if not re.fullmatch(USERNAME_PATTERN, form.name.data):
+            messages.append("The username format doesn't match.")
 
         user = None
         if not messages:
-            user = Users.query.filter(Users.login == escape(form.name.data)).first()
+            user = Users.query.filter_by(login=escape(form.name.data)).first()
             if not user:
                 messages.append("Username not found.")
-            elif not user.password == hash_password(form.password.data, form.name.data):
+            elif not user.password == helpers.hash_password(form.password.data, form.name.data):
                 messages.append("Incorrect password.")
 
         if messages:
@@ -61,8 +60,7 @@ def introduction():
             flash(f"Welcome back, {user.login}!")
             form = None
 
-    return render_template("introduction.html", nav=FOOTER, form=form, \
-        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN), code
+    return render_template("introduction.html", nav=FOOTER, form=form, usr_pattern=USERNAME_PATTERN), code
 
 
 @app.route("/anonymization", methods=['GET', 'POST'])
@@ -89,25 +87,21 @@ def personal(username):
         return redirect(url_for('index')), 303
 
     elif form.validate_on_submit():
-        messages = check_form("none", form.old_password.data)
-        messages += check_form("none", form.new_password.data, form.confirmation.data)
-
         hashed = None
-        if not messages:
-            user = Users.query.filter(Users.login == user['name']).first()
-
-            if not user.password == hash_password(form.old_password.data, user.login):
-                messages.append("Check out your old password.")
-            else:
-                hashed = hash_password(form.new_password.data, user.login)
-                if user.password == hashed:
-                    messages.append("This is the same old password.")
+        user = Users.query.filter_by(login=user['name']).first()
+        messages = []
+        if not user.password == helpers.hash_password(form.old_password.data, user.login):
+            messages.append("Check out your old password.")
+        else:
+            hashed = helpers.hash_password(form.new_password.data, user.login)
+            if user.password == hashed:
+                messages.append("This is the same old password.")
 
         if not messages:
             user.password = hashed
             try:
                 db.session.commit()
-            except exc.SQLAlchemyError:
+            except SQLAlchemyError:
                 messages.append("Something got wrong :(")
 
         if messages:
@@ -120,7 +114,7 @@ def personal(username):
             code = 200
 
     return render_template("personal.html", nav=FOOTER, form=form, \
-        pass_pattern=PASSWORD_PATTERN, pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH), code
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH), code
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -133,18 +127,20 @@ def register():
         return redirect(url_for('index')), 303
 
     elif form.validate_on_submit():
-        messages = check_form(form.name.data, form.password.data, form.confirmation.data)
+        messages = []
+        if not re.fullmatch(USERNAME_PATTERN, form.name.data):
+            messages.append("The username format doesn't match.")
 
         if not messages:
             status = Statuses.query.first()
             user = Users(login=escape(form.name.data), get_status=status, \
-                password=hash_password(form.password.data, form.name.data))
+                    password=helpers.hash_password(form.password.data, form.name.data))
             db.session.add(user)
             try:
                 db.session.commit()
-            except exc.IntegrityError:
+            except IntegrityError:
                 messages.append("Username already exist.")
-            except exc.SQLAlchemyError:
+            except SQLAlchemyError:
                 messages.append("Wrong request.")
 
         if messages:
@@ -157,18 +153,17 @@ def register():
             form = None
             code = 200
 
-    return render_template(
-        "register.html", nav=FOOTER, form=form,
+    return render_template("register.html",
+        nav=FOOTER, form=form, usr_pattern=USERNAME_PATTERN,
         user_min=USERNAME_MIN, user_max=USERNAME_LENGTH,
-        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH,
-        usr_pattern=USERNAME_PATTERN, pass_pattern=PASSWORD_PATTERN
+        pass_min=USER_PASSWORD_MIN, pass_max=USER_PASSWORD_LENGTH
     ), code
 
 
 @app.route("/board/<board>/", methods=['GET', 'POST'])
 @app.route("/board/<board>/<int:page>/")
 def board(board, page=1):
-    board = Boards.query.filter(Boards.short == escape(board)).first()
+    board = Boards.query.filter_by(short=escape(board)).first()
     if not board:
         return redirect(url_for('index')), 303
     elif page <= 0:
@@ -179,30 +174,21 @@ def board(board, page=1):
 
     if form_thread.validate_on_submit():
         user = session.get('user')
-        board = make_a_post(form_thread, board, user)
+        board = helpers.make_a_post(form_thread, board, user)
 
-    # generete a page content
-    start = page * 10 - 10
-    stop = page * 10
-    threads_on_page = Threads.query.filter(Threads.board_id == board.id, Threads.post_count > 0). \
-                        order_by(Threads.updated.desc()).slice(start, stop).all()
-    if not threads_on_page:
-        if page != 1:
-            return redirect(url_for('board', board=board.short, page=1)), 303
-        else:
-            return redirect(url_for('index')), 303
-    else:
-        pages_total = int(board.thread_count / 10) + (board.thread_count % 10 > 0)
-        pages_total = [i for i in range(1, pages_total + 1)]
+    try:
+        pages_total, threads_with_posts = helpers.generete_page(page, board)
+    except PageDoesNotExistError:
+        redirect(url_for('board', board=board.short, page=1)), 303
+    except BoardIsEmptyError:
+        redirect(url_for('index')), 303
 
-        threads_with_posts = fill_board(threads_on_page)
-
-    return render_template("board.html",
-        nav=FOOTER, thread_count=board.thread_count, short_name=board.short,
-        long_name=board.name, description=board.description, base_url=base_url,
-        threads=threads_with_posts, pages=pages_total, pass_max=ANON_PASSWORD_LENGTH,
-        theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
-        form_thread=form_thread
+    return render_template("board.html",  # TODO user don't ned to see a password field
+        nav=FOOTER, form_thread=form_thread, base_url=base_url,
+        thread_count=board.thread_count, short_name=board.short,
+        long_name=board.name, description=board.description,
+        threads=threads_with_posts, pages=pages_total,
+        pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
     ), 200
 
 

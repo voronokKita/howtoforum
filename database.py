@@ -5,8 +5,8 @@ from constants import *
 
 
 app.config.update(
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SQLALCHEMY_DATABASE_URI="sqlite:///forum.db"
+    SQLALCHEMY_TRACK_MODIFICATIONS = False,
+    SQLALCHEMY_DATABASE_URI = "sqlite:///forum.db"
 )
 db = SQLAlchemy(app)
 """
@@ -24,7 +24,7 @@ class Statuses(db.Model):
     __tablename__ = 'statuses'
 
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False)
+    status = db.Column(db.String(DEFAULT_LENGTH), unique=True, index=True, nullable=False)
 
     users = db.relationship('Users', backref='get_status')
 
@@ -36,7 +36,7 @@ class Resource_types(db.Model):
     __tablename__ = 'resource_types'
 
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(DEFAULT_LENGTH), unique=True, nullable=False) # TODO index, constants
+    type = db.Column(db.String(DEFAULT_LENGTH), unique=True, index=True, nullable=False)
 
     resources = db.relationship('Resources', backref='get_type')
 
@@ -64,7 +64,8 @@ class Threads(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     board_id = db.Column(db.Integer, \
-        db.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'), index=True, nullable=False)
+                db.ForeignKey(Boards.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+                index=True, nullable=False)
     date = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     updated = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     post_count = db.Column(db.Integer, default=0, nullable=False)
@@ -79,11 +80,12 @@ class Threads(db.Model):
 class Users(db.Model):
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key=True, index=True)
-    login = db.Column(db.String(USERNAME_LENGTH), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    login = db.Column(db.String(USERNAME_LENGTH), unique=True, index=True, nullable=False)
     password = db.Column(db.String(USER_PASSWORD_LENGTH), nullable=False)
     status = db.Column(db.Integer, \
-        db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'), nullable=False)
+                db.ForeignKey(Statuses.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+                nullable=False)
     registered = db.Column(db.DateTime, default=datetime.datetime.now)
 
     resources = db.relationship('Resources', backref='get_user')
@@ -93,8 +95,7 @@ class Users(db.Model):
         return f"<user: {self.login}>"
 
 
-attachments = db.Table(
-    'attachments',
+attachments = db.Table('attachments',
     db.Column('post_id', db.Integer, db.ForeignKey('posts.id'), index=True, nullable=False),
     db.Column('resource_id', db.Integer, db.ForeignKey('resources.id'), nullable=False)
 )
@@ -104,9 +105,11 @@ class Posts(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     thread_id = db.Column(db.Integer, \
-        db.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'), index=True, nullable=False)
+                db.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+                index=True, nullable=False)
     user_id = db.Column(db.Integer, \
-        db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'), default=None)
+                db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'), \
+                default=None)
     password = db.Column(db.String(ANON_PASSWORD_LENGTH), default=None)
     date = db.Column(db.DateTime, default=datetime.datetime.now, nullable=False)
     theme = db.Column(db.String(DEFAULT_LENGTH), default=None)
@@ -125,7 +128,8 @@ class Resources(db.Model):
     id = db.Column(db.Integer, primary_key=True, index=True)
     resource = db.Column(db.String(RESOURCE_LENGTH), nullable=False)
     type = db.Column(db.Integer, \
-        db.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), nullable=False)
+            db.ForeignKey(Resource_types.id, onupdate='CASCADE', ondelete='RESTRICT'), \
+            nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'))
     uploaded = db.Column(db.DateTime, default=datetime.datetime.now)
 
