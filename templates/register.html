@@ -31,17 +31,11 @@
           <li>&nbsp;&nbsp;username: from {{ user_min }} to {{ user_max }} characters;<br>
               &nbsp;&nbsp;letters, numbers, underscore and minus symbols</li>
           <li>&nbsp;&nbsp;password: from {{ pass_min }} to {{ pass_max }} unicode symbols</li>
-        {% endif %}
 
-        {% if form %}
-          {% for error in form.name.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-          {% for error in form.password.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-          {% for error in form.confirmation.errors %}
-            <li>{{ error }}</li>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
           {% endfor %}
         {% endif %}
 

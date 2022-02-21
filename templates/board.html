@@ -11,6 +11,7 @@
     <div class='boards_container'>
 
       {% include "/layouts/list_of_pages.html" %}
+
       <section class='create_new_thread'>
         <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='thread_form'>
           {{ form_thread.csrf_token }}
@@ -47,6 +48,7 @@
         <section class='thread_section'>
 
           <div class='thread_header'>
+            <div>{{ thread.id }}</div>
             <div>{% if thread.archivated %}archive{% else %}alive{% endif %}</div>
             <div>post count: {{ thread.post_count }}</div>
           </div>
@@ -80,9 +82,13 @@
 
             </article>
 
-            {% if loop.index == 1 and thread.hidden_posts %}
-              <div class='expand'>{{ thread.hidden_posts }} posts are omitted,
-                <a href="?">expand thread ⮒</a></div>
+            {% if loop.index == 1 %}
+              <div class='expand'>
+                {% if thread.hidden_posts %}
+                  {{ thread.hidden_posts }} posts are omitted,
+                {% endif %}
+                <a href="{{ base_url }}thread:{{ thread.id }}/">expand thread ⮒</a>
+              </div>
             {% endif %}
 
           {% endfor %}

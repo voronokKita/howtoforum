@@ -75,7 +75,7 @@ def anonymization():
     return render_template("anonymization.html", nav=FOOTER, form=form), 200
 
 
-@app.route("/user/<username>", methods=['GET', 'POST'])
+@app.route("/user:<username>", methods=['GET', 'POST'])
 def personal(username):
     user = session.get('user')
     form = ChangePassword()
@@ -158,8 +158,8 @@ def register():
     ), code
 
 
-@app.route("/board/<board>/", methods=['GET', 'POST'])
-@app.route("/board/<board>/<int:page>/")
+@app.route("/board:<board>/", methods=['GET', 'POST'])
+@app.route("/board:<board>/page:<int:page>/")
 def board(board, page=1):
     board = Boards.query.filter_by(short=escape(board)).first()
     if not board:
@@ -168,20 +168,20 @@ def board(board, page=1):
         return redirect(url_for('board', board=board.short, page=1)), 303
     else:
         form_thread = MakeThread()
-        base_url = f"/board/{board.short}/"
+        base_url = f"/board:{board.short}/"
 
     if form_thread.validate_on_submit():
         user = session.get('user')
         try:
             board = helpers.make_a_post(form_thread, board, user)
-        except IntegrityError as error:  # TODO
-            return f"Data already exists. {error}"
+        except IntegrityError as error:
+            return f"Data already exists. ERROR: {error}"  # TODO
         except SQLAlchemyError as error:
-            return f"Something went terrible wrong... {error}"
+            return f"Something went terrible wrong... ERROR: {error}"  # TODO
 
     try:
         pages_total, threads_with_posts = helpers.generete_page(page, board)
-    except PageDoesNotExistError:
+    except PageOutOfRangeError:
         return redirect(url_for('board', board=board.short, page=1)), 303
     except BoardIsEmptyError:
         return redirect(url_for('index')), 303
@@ -193,6 +193,18 @@ def board(board, page=1):
         threads=threads_with_posts, pages=pages_total,
         pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
     ), 200
+
+
+@app.route("/board:<board>/thread:<int:thread>/", methods=['GET', 'POST'])
+def thread(board, thread):
+    board = Boards.query.filter_by(short=escape(board)).first()
+    thread = Threads.query.filter_by(id=thread).first()
+    if not board:
+        return redirect(url_for('index')), 303
+    elif not thread:
+        return redirect(url_for('board', board=board.short, page=1)), 303
+    else:
+        pass
 
 
 if __name__ == '__main__':

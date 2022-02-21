@@ -13,7 +13,7 @@ from markupsafe import Markup, escape
 from werkzeug.utils import secure_filename
 
 
-class PageDoesNotExistError(Exception): pass
+class PageOutOfRangeError(Exception): pass
 class BoardIsEmptyError(Exception): pass
 
 CWD = pathlib.Path.cwd()

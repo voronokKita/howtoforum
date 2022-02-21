@@ -92,7 +92,7 @@ def generete_page(page, board):
 
     if not threads_on_page:
         if page != 1:
-            raise PageDoesNotExistError("error")
+            raise PageOutOfRangeError("error")
         else:
             raise BoardIsEmptyError("error")
     else:
@@ -122,7 +122,7 @@ def fill_board(threads_on_page):
                 hidden_posts = thread.post_count - POSTS_PER_THREAD - 1
 
         t = {'post_count': thread.post_count, 'hidden_posts': hidden_posts,
-             'archivated': thread.archivated, 'posts': [op] + last_posts}
+             'archivated': thread.archivated, 'posts': [op] + last_posts, 'id': thread.id}
         threads_with_posts.append(t)
 
     # fill posts with data

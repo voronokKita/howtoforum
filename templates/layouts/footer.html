@@ -9,7 +9,7 @@
       </li>
       {% for board in nav %}
         <li class='nav_li'>
-          <a href="/board/{{ board }}/">
+          <a href="/board:{{ board }}/">
             <div class='nav_button'>/{{ board }}/</div>
           </a>
         </li>
@@ -22,7 +22,7 @@
     <ul id='login_ul'>
       <li class='login_li'>
         {% if session.user %}
-          <a href="/user/{{ session.user.name }}">{{ session.user.name }}</a>
+          <a href="/user:{{ session.user.name }}">{{ session.user.name }}</a>
         {% else %}
           anonymous
         {% endif %}

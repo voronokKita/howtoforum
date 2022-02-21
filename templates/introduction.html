@@ -25,11 +25,10 @@
 
       <ul class='login_list'>
         {% if form %}
-          {% for error in form.name.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-          {% for error in form.password.errors %}
-            <li>{{ error }}</li>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
           {% endfor %}
         {% endif %}
 
