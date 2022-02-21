@@ -22,7 +22,7 @@ $min_width: 340px;
 // </list of pages>
 
 // <forms>
-.create_new_thread {
+.main_form_container {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
@@ -30,7 +30,7 @@ $min_width: 340px;
 
   //border: 1px solid red;
 }
-.thread_form {
+.main_form {
   width: 60%;
   min-width: 350px;
   border-bottom: 1px solid green;
@@ -80,22 +80,22 @@ $min_width: 340px;
   border-radius: 1%;
   font-size: 15px;
 }
-.thread_help {
+.form_help {
   margin: 8px 0;
   font-size: 10px;
 }
-.thread_help * {
+.form_help * {
   line-height: 1;
 }
-.thread_help_h * {
+.form_help_h * {
   font-size: 14px;
 }
-.thread_help_t {
+.form_help_t {
   margin-left: 11px;
   list-style: circle;
   font-size: 12px;
 }
-.thread_error {
+.posting_error {
   margin-top: 6px;
   font-size: 14px;
   color: red;

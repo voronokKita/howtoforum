@@ -1,6 +1,6 @@
 {% extends "/layouts/layout.html" %}
 
-{% block title %}{{ short_name }}{% endblock %}
+{% block title %}forum/{{ short_name }}/{% endblock %}
 
 {% block header %}{{ long_name | capitalize }}{% endblock %}
 {% block description %}{{ description }}{% endblock %}
@@ -12,37 +12,7 @@
 
       {% include "/layouts/list_of_pages.html" %}
 
-      <section class='create_new_thread'>
-        <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='thread_form'>
-          {{ form_thread.csrf_token }}
-          <ul>
-            <li>
-              <span>{{ form_thread.theme(placeholder="Theme", class='form_theme') }}</span>
-              <span>{{ form_thread.submit(value="Post", class='form_post') }}</span>
-            </li>
-            <li>{{ form_thread.text(placeholder="Start a new thread", class='form_text') }}</li>
-            <li>{{ form_thread.file1(class='form_file') }}</li>
-            <li>{{ form_thread.file2(class='form_file') }}</li>
-            <li>{{ form_thread.file3(class='form_file') }}</li>
-            <li {% if session['user'] %}class='password_hidden'{% endif %}>
-              {{ form_thread.password(placeholder="Password", class='form_password') }}
-            </li>
-
-            <div class='thread_help'>
-              <li class='thread_help_h'><h6>Help</h6></li>
-              <li class='thread_help_t'>both theme and password are optional</li>
-              <li class='thread_help_t'>theme length is up to {{ theme_max }} symbols</li>
-              <li class='thread_help_t'>password is up to {{ pass_max }} symbols</li>
-              <li class='thread_help_t'>file size must be less than {{ filesize }}MB</li>
-              {% for field, errors in form_thread.errors.items() %}
-                {% for error in errors %}
-                  <li class='thread_error'>{{ error }}</li>
-                {% endfor %}
-              {% endfor %}
-            </div>
-          </ul>
-        </form>
-      </section>
+      {% include "/layouts/main_posting_form.html" %}
 
       {% for thread in threads %}
         <section class='thread_section'>

@@ -16,15 +16,16 @@ def hash_password(password, salt=""):
         return hashlib.sha3_224(s.encode()).hexdigest()
 
 
-def make_a_post(form, board, user, thread=None):
+def make_a_post(form, board, user, thread=None):  # TODO empty post error
     """ makes a new thread or a new post, saves files """
     date = datetime.datetime.now()
 
-    thread = Threads(get_board=board, date=date, updated=date)
-    db.session.add(thread)
-    db.session.commit()
-    thread = Threads.query.filter(Threads.board_id == board.id, \
-                Threads.post_count == 0, Threads.date == date).first()
+    if not thread:
+        thread = Threads(get_board=board, date=date, updated=date)
+        db.session.add(thread)
+        db.session.commit()
+        thread = Threads.query.filter(Threads.board_id == board.id, \
+                    Threads.post_count == 0, Threads.date == date).first()
 
     password = None
     theme = None
@@ -33,58 +34,70 @@ def make_a_post(form, board, user, thread=None):
     if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH:
         theme = escape(form.theme.data)
 
-    post = Posts(get_thread=thread, password=password, date=date, theme=theme, \
-            text=escape(form.text.data), has_files=True)
+    post = Posts(get_thread=thread, password=password, date=date, \
+            theme=theme, text=escape(form.text.data), has_files=True)
     db.session.add(post)
 
     if user:
         user = Users.query.filter_by(login=user['name']).first()
         user.posts.append(post)
+
     db.session.commit()
 
     files = [form.file1.data, form.file2.data, form.file3.data]
     if not files[0] and not files[1] and not files[2]:
+        # the file by default for empty posts
         file = Resources.query.filter_by(id=1).first()
         post.files.append(file)
 
     else:
         files = [f for f in files if f is not None]
-        for file in files:
-            filename = secure_filename(file.filename)
-            tmp_file_location = FILE_STORAGE / "tmp" / filename
-            file.save(tmp_file_location)
+        load_files(files, post, user)
 
-            mime = file.mimetype.split("/")
-            if mime[0] == "image":
-                resource_type = FILE_TYPE_IMAGE
-            elif mime[0] == "text" or mime[1] in ANOTHER_TEXT_TYPES or "vnd" in mime[1]:
-                resource_type = FILE_TYPE_TEXT
-            else:
-                resource_type = FILE_TYPE_OTHER
-            resource_type = Resource_types.query.filter_by(type=resource_type).first()
-
-            while True:
-                duplicate = Resources.query.filter_by(resource=filename).first()
-                if duplicate:
-                    extension = pathlib.Path(filename).suffix
-                    filename = ''.join(random.choices(string.ascii_letters + string.digits, k=15))
-                    filename += extension
-                else:
-                    break
-            file = Resources(get_type=resource_type, resource=filename)
-
-            if user:
-                user.resources.append(file)
-            post.files.append(file)
-            db.session.commit()
-            tmp_file_location.rename(FILE_STORAGE / resource_type.type / file.resource)
-
+    thread.updated = date
     thread.post_count += 1
     board.thread_count += 1
     db.session.commit()
     return board
 
-def generete_page(page, board):
+
+def load_files(files, post, user=None):
+    for file in files:
+        filename = secure_filename(file.filename)
+        tmp_file_location = FILE_STORAGE / "tmp" / filename
+        file.save(tmp_file_location)
+
+        mime = file.mimetype.split("/")
+        if mime[0] == "image":
+            resource_type = FILE_TYPE_IMAGE
+        elif mime[0] == "text" or mime[1] in ANOTHER_TEXT_TYPES or "vnd" in mime[1]:
+            resource_type = FILE_TYPE_TEXT
+        elif mime[0] == "audio":
+            resource_type = FILE_TYPE_AUDIO
+        elif mime[0] == "video":
+            resource_type = FILE_TYPE_VIDEO
+        else:
+            resource_type = FILE_TYPE_OTHER
+        resource_type = Resource_types.query.filter_by(type=resource_type).first()
+
+        while True:
+            duplicate = Resources.query.filter_by(resource=filename).first()
+            if duplicate:
+                extension = pathlib.Path(filename).suffix
+                filename = ''.join(random.choices(string.ascii_letters + string.digits, k=15))
+                filename += extension
+            else:
+                break
+        file = Resources(get_type=resource_type, resource=filename)
+
+        if user:
+            user.resources.append(file)
+        post.files.append(file)
+        db.session.commit()
+        tmp_file_location.rename(FILE_STORAGE / resource_type.type / file.resource)
+
+
+def generete_board_page(page, board):
     start = page * 10 - 10
     stop = page * 10
     threads_on_page = Threads.query.filter(Threads.board_id == board.id, Threads.post_count > 0) \
@@ -132,6 +145,7 @@ def fill_board(threads_on_page):
 
         for post in old_list:
             username = post.get_user.login if post.user_id else None
+            theme = Markup(post.theme) if post.theme else None
 
             files = []
             if post.has_files:
@@ -139,7 +153,6 @@ def fill_board(threads_on_page):
                     p = f"/static/data/{f.get_type.type}/"
                     files.append({'name': f.resource, 'path': p})
 
-            theme = Markup(post.theme) if post.theme else None
             p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
                  'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
             new_list.append(p)
@@ -147,6 +160,28 @@ def fill_board(threads_on_page):
         thread['posts'] = new_list
 
     return threads_with_posts
+
+
+def generete_thread_page(thread):
+    thread = {'post_count': thread.post_count, 'archivated': thread.archivated,
+              'posts': thread.posts, 'id': thread.id}
+    new_list = []
+    for post in thread['posts']:
+        username = post.get_user.login if post.user_id else None
+        theme = Markup(post.theme) if post.theme else None
+
+        files = []
+        if post.has_files:
+            for file in post.files:
+                path = f"/static/data/{file.get_type.type}/"
+                files.append({'name': file.resource, 'path': path})
+
+        p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
+             'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
+        new_list.append(p)
+
+    thread['posts'] = new_list
+    return thread
 
 
 def fill_the_database():

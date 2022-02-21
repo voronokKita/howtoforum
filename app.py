@@ -16,7 +16,7 @@ import helpers
 
 @app.before_first_request
 def before_first_request():
-    helpers.fill_the_database()
+    #helpers.fill_the_database()
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
 
@@ -170,7 +170,7 @@ def board(board, page=1):
         form_thread = MakeThread()
         base_url = f"/board:{board.short}/"
 
-    if form_thread.validate_on_submit():
+    if form_thread.validate_on_submit():  # TODO separate function
         user = session.get('user')
         try:
             board = helpers.make_a_post(form_thread, board, user)
@@ -180,14 +180,14 @@ def board(board, page=1):
             return f"Something went terrible wrong... ERROR: {error}"  # TODO
 
     try:
-        pages_total, threads_with_posts = helpers.generete_page(page, board)
+        pages_total, threads_with_posts = helpers.generete_board_page(page, board)
     except PageOutOfRangeError:
         return redirect(url_for('board', board=board.short, page=1)), 303
     except BoardIsEmptyError:
         return redirect(url_for('index')), 303
 
     return render_template("board.html",
-        nav=FOOTER, form_thread=form_thread, base_url=base_url,
+        nav=FOOTER, form_main=form_thread, base_url=base_url,
         thread_count=board.thread_count, short_name=board.short,
         long_name=board.name, description=board.description,
         threads=threads_with_posts, pages=pages_total,
@@ -198,13 +198,35 @@ def board(board, page=1):
 @app.route("/board:<board>/thread:<int:thread>/", methods=['GET', 'POST'])
 def thread(board, thread):
     board = Boards.query.filter_by(short=escape(board)).first()
-    thread = Threads.query.filter_by(id=thread).first()
+    thread = Threads.query.filter_by(id=escape(thread)).first()
     if not board:
         return redirect(url_for('index')), 303
     elif not thread:
         return redirect(url_for('board', board=board.short, page=1)), 303
     else:
-        pass
+        base_url = f"/board:{board.short}/thread:{thread.id}/"
+        form_post = MakePost()
+        form_post.thread_id.data = thread.id
+
+    if form_post.validate_on_submit():  # TODO separate function
+        if not form_post.thread_id.data == thread.id:
+            form_post.thread_id.errors.append(M_WRONG)
+        else:
+            user = session.get('user')
+            try:
+                board = helpers.make_a_post(form_post, board, user, thread)
+            except IntegrityError as error:
+                return f"Data already exists. ERROR: {error}"  # TODO
+            except SQLAlchemyError as error:
+                return f"Something went terrible wrong... ERROR: {error}"  # TODO
+
+    thread = helpers.generete_thread_page(thread)
+
+    return render_template("thread.html",
+        nav=FOOTER, form_main=form_post, base_url=base_url,
+        short_name=board.short, long_name=board.name, thread=thread,
+        pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
+    ), 200
 
 
 if __name__ == '__main__':

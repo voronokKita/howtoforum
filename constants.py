@@ -21,10 +21,11 @@ FILE_STORAGE = CWD / "static" / "data"
 
 USER_STATUSES = ["user", "moderator", "administrator"]
 
-FILE_TYPE_IMAGE = "image"
-FILE_TYPE_TEXT = "text"
-FILE_TYPE_AUDIO = "music"
-FILE_TYPE_OTHER = "other"
+FILE_TYPE_IMAGE = 'image'
+FILE_TYPE_TEXT = 'text'
+FILE_TYPE_AUDIO = 'music'
+FILE_TYPE_VIDEO = 'video'
+FILE_TYPE_OTHER = 'other'
 RESOURCE_TYPES = [FILE_TYPE_IMAGE, FILE_TYPE_TEXT, FILE_TYPE_AUDIO, FILE_TYPE_OTHER]
 
 BOARDS = [

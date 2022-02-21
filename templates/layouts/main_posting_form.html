@@ -1,0 +1,34 @@
+<section class='main_form_container'>
+  <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='main_form'>
+    {{ form_main.csrf_token }}
+    <ul>
+      {% if "thread" in base_url %}
+        <li>{{ form_main.thread_id(readonly=True) }}</li>
+      {% endif %}
+      <li>
+        <span>{{ form_main.theme(placeholder="Theme", class='form_theme') }}</span>
+        <span>{{ form_main.submit(value="Post", class='form_post') }}</span>
+      </li>
+      <li>{{ form_main.text(placeholder="Start a new thread", class='form_text') }}</li>
+      <li>{{ form_main.file1(class='form_file') }}</li>
+      <li>{{ form_main.file2(class='form_file') }}</li>
+      <li>{{ form_main.file3(class='form_file') }}</li>
+      <li {% if session['user'] %}class='password_hidden'{% endif %}>
+        {{ form_main.password(placeholder="Password", class='form_password') }}
+      </li>
+
+      <div class='form_help'>
+        <li class='form_help_h'><h6>Help</h6></li>
+        <li class='form_help_t'>both theme and password are optional</li>
+        <li class='form_help_t'>theme length is up to {{ theme_max }} symbols</li>
+        <li class='form_help_t'>password is up to {{ pass_max }} symbols</li>
+        <li class='form_help_t'>file size must be less than {{ filesize }}MB</li>
+        {% for field, errors in form_main.errors.items() %}
+          {% for error in errors %}
+            <li class='posting_error'>{{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </ul>
+  </form>
+</section>
