@@ -60,8 +60,12 @@ def make_a_post(form, board, user, thread=None):
 
     if op:
         board.thread_count += 1
-    thread.updated = date
     thread.post_count += 1
+    if not thread.archivated and thread.post_count < BUMP_LIMIT:
+        thread.updated = date
+    elif not thread.archivated and thread.post_count >= BUMP_LIMIT:
+        thread.archivated = True
+
     db.session.commit()
     return board
 
@@ -261,27 +265,49 @@ def fill_the_database():
         db.session.commit()
         print("db: filled resources list")
 
+        print("db: makes some test threads")
         boards = Boards.query.all()
-        thread_id = 1
         for board in boards:
-            i = 1
-            while i <= 142:
-                print(f"db: makes thread {thread_id} on board {board.short}")
-                new_thread = Threads(id=thread_id, post_count=2, get_board=board)
+            t = 1
+            while t <= 142:
+                print(f"db: /{board.short}/{t}")
+                new_thread = Threads(get_board=board)
                 db.session.add(new_thread)
-                op = Posts(get_thread=new_thread, theme="test", text=f"thread №{thread_id}", has_files=True)
+                op = Posts(get_thread=new_thread, theme="test", text="Just a test thread.", has_files=True)
                 db.session.add(op)
                 file = Resources.query.filter_by(id=1).first()
                 op.files.append(file)
                 board.thread_count += 1
-                db.session.commit()
-                post = Posts(get_thread=new_thread, text=f"reply to {thread_id}")
+                new_thread.post_count += 1
+                post = Posts(get_thread=new_thread, text=f"reply to {new_thread.id}")
                 db.session.add(post)
+                new_thread.post_count += 1
                 db.session.commit()
-                thread_id += 1
-                i += 1
+                t += 1
 
-        print(f"db: makes hello thread")
+        print(f"db: makes the archivated thread")
+        thread = Threads(get_board=boards[0])
+        db.session.add(thread)
+        boards[0].thread_count += 1
+        db.session.commit()
+        thread = Threads.query.order_by(Threads.id.desc()).first()
+        op = Posts(get_thread=thread, theme="To The Bump Limit!", \
+                text="This thread is going to reach the bump limit!", has_files=True)
+        file = Resources.query.filter_by(id=9).first()
+        op.files.append(file)
+        thread.post_count += 1
+        db.session.commit()
+        p = 2
+        while p <= 510:
+            post = Posts(get_thread=thread, text="Bump!")
+            thread.post_count += 1
+            p += 1
+            if p >= BUMP_LIMIT and not thread.archivated:
+                thread.updated = datetime.datetime.now()
+                thread.archivated = True
+
+
+        print(f"db: makes the hello thread")
         thread = Threads(get_board=boards[0])
         db.session.add(thread)
         boards[0].thread_count += 1

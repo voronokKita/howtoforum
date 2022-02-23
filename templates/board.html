@@ -19,7 +19,7 @@
 
           <div class='thread_header'>
             <div>{{ thread.id }}</div>
-            <div>{% if thread.archivated %}archive{% else %}alive{% endif %}</div>
+            <div>{% if thread.archivated %}<img src="/static/images/archive.ico">{% else %}alive{% endif %}</div>
             <div>post count: {{ thread.post_count }}</div>
           </div>
 

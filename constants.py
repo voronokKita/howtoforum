@@ -37,6 +37,7 @@ BOARDS = [
 
 THREADS_ON_PAGE = 10
 POSTS_PER_THREAD = 5
+BUMP_LIMIT = 500
 
 USERNAME_MIN = 2
 USERNAME_LENGTH = 20
@@ -82,6 +83,7 @@ BASE_RESOURCES = [
     {'file': "0000000005.png", 'user': 3},
     {'file': "0000000006.jpg", 'user': 3},
     {'file': "0000000007.png", 'user': 3},
+    {'file': "0000000008.png", 'user': None}
 ]
 HELLO_THREAD = [
     {'user': BASE_RESOURCES[1]['user'], 'theme': "Hello!",
