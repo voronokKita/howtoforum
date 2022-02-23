@@ -16,23 +16,31 @@ def hash_password(password, salt=""):
         return hashlib.sha3_224(s.encode()).hexdigest()
 
 
-def make_a_post(form, board, user, thread=None):  # TODO empty post error
+def make_a_post(form, board, user, thread=None):
     """ makes a new thread or a new post, saves files """
+    op = True if not thread else False
     date = datetime.datetime.now()
 
-    if not thread:
-        thread = Threads(get_board=board, date=date, updated=date)
+    # 0 understand post content
+    files = [form.file1.data, form.file2.data, form.file3.data]
+    files = [f for f in files if f is not None]
+    text = form.text.data
+    if not text and not files:
+        raise EmptyPostError("error")
+
+    # 1 load files
+    elif files:
+        files = load_files(files)
+
+    # 2 db operation:
+    if op:
+        thread = Threads(get_board=board, date=date)
         db.session.add(thread)
-        db.session.commit()
         thread = Threads.query.filter(Threads.board_id == board.id, \
                     Threads.post_count == 0, Threads.date == date).first()
 
-    password = None
-    theme = None
-    if not user and form.password.data:
-        password = hash_password(form.password.data)
-    if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH:
-        theme = escape(form.theme.data)
+    password = hash_password(form.password.data) if not user and form.password.data else None
+    theme = escape(form.theme.data) if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH else None
 
     post = Posts(get_thread=thread, password=password, date=date, \
             theme=theme, text=escape(form.text.data), has_files=True)
@@ -42,30 +50,46 @@ def make_a_post(form, board, user, thread=None):  # TODO empty post error
         user = Users.query.filter_by(login=user['name']).first()
         user.posts.append(post)
 
-    db.session.commit()
-
-    files = [form.file1.data, form.file2.data, form.file3.data]
-    if not files[0] and not files[1] and not files[2]:
-        # the file by default for empty posts
+    if op and not files:
+        # the file by default for empty op
         file = Resources.query.filter_by(id=1).first()
         post.files.append(file)
 
-    else:
-        files = [f for f in files if f is not None]
-        load_files(files, post, user)
+    elif files:
+        post, user = save_files(files, post, user)
 
+    if op:
+        board.thread_count += 1
     thread.updated = date
     thread.post_count += 1
-    board.thread_count += 1
     db.session.commit()
     return board
 
 
-def load_files(files, post, user=None):
+def load_files(files):
+    new_file_names = []
+    tmp_files = []
     for file in files:
         filename = secure_filename(file.filename)
+
+        # check for file doubles
+        if filename not in new_file_names:
+            new_file_names.append(filename)
+        else:
+            continue
+
         tmp_file_location = FILE_STORAGE / "tmp" / filename
         file.save(tmp_file_location)
+
+        tmp_files.append( {'file': file, 'tmp': tmp_file_location} )
+
+    return tmp_files
+
+
+def save_files(files, post, user):
+    for file in files:
+        tmp_file_location = file['tmp']
+        file = file['file']
 
         mime = file.mimetype.split("/")
         if mime[0] == "image":
@@ -80,6 +104,7 @@ def load_files(files, post, user=None):
             resource_type = FILE_TYPE_OTHER
         resource_type = Resource_types.query.filter_by(type=resource_type).first()
 
+        filename = secure_filename(file.filename)
         while True:
             duplicate = Resources.query.filter_by(resource=filename).first()
             if duplicate:
@@ -88,13 +113,15 @@ def load_files(files, post, user=None):
                 filename += extension
             else:
                 break
+
         file = Resources(get_type=resource_type, resource=filename)
 
         if user:
             user.resources.append(file)
         post.files.append(file)
-        db.session.commit()
         tmp_file_location.rename(FILE_STORAGE / resource_type.type / file.resource)
+
+    return post, user
 
 
 def generete_board_page(page, board):

@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 
 class PageOutOfRangeError(Exception): pass
 class BoardIsEmptyError(Exception): pass
+class EmptyPostError(Exception): pass
 
 CWD = pathlib.Path.cwd()
 FILE_STORAGE = CWD / "static" / "data"
@@ -59,6 +60,8 @@ M_PASSWORD_LEN = "The password length doesn't match."
 M_PASSWORD_CONFIRM = "The password confirmation doesn't match."
 M_POST_THEME_LEN = f"Theme is {DEFAULT_LENGTH} symbols max."
 M_POST_PASSWORD_LEN = f"Password is {ANON_PASSWORD_LENGTH} symbols max."
+M_INTEGRITY_ERROR = "DB ERROR: data already exists."
+M_SQL_ALCHEMY_ERROR = "DB ERROR: something went terrible wrong..."
 
 GLOBAL_SALT = """So, with sadness in my heart
 Feel the best thing I could do

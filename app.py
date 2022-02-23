@@ -174,10 +174,14 @@ def board(board, page=1):
         user = session.get('user')
         try:
             board = helpers.make_a_post(form_thread, board, user)
-        except IntegrityError as error:
-            return f"Data already exists. ERROR: {error}"  # TODO
-        except SQLAlchemyError as error:
-            return f"Something went terrible wrong... ERROR: {error}"  # TODO
+        except EmptyPostError:
+            form_thread.submit.errors.append(M_EMPTY)
+        except IntegrityError:
+            form_thread.submit.errors.append(M_INTEGRITY_ERROR)
+            db.session.rollback()
+        except SQLAlchemyError:
+            form_thread.submit.errors.append(M_SQL_ALCHEMY_ERROR)
+            db.session.rollback()
 
     try:
         pages_total, threads_with_posts = helpers.generete_board_page(page, board)
@@ -215,10 +219,14 @@ def thread(board, thread):
             user = session.get('user')
             try:
                 board = helpers.make_a_post(form_post, board, user, thread)
-            except IntegrityError as error:
-                return f"Data already exists. ERROR: {error}"  # TODO
-            except SQLAlchemyError as error:
-                return f"Something went terrible wrong... ERROR: {error}"  # TODO
+            except EmptyPostError:
+                form_post.submit.errors.append(M_EMPTY)
+            except IntegrityError:
+                form_post.submit.errors.append(M_INTEGRITY_ERROR)
+                db.session.rollback()
+            except SQLAlchemyError:
+                form_post.submit.errors.append(M_SQL_ALCHEMY_ERROR)
+                db.session.rollback()
 
     thread = helpers.generete_thread_page(thread)
 
