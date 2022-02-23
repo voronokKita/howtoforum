@@ -2,11 +2,11 @@
   <ul class='pages_list'>
     {% for p in pages %}
       <li class='pages_list_li'>
-        <a href="{{ base_url }}page:{{ p }}/">
-          <span class='pages_list_square'>[</span>
-          <span class='pages_list_num'>{{ p }}</span>
-          <span class='pages_list_square'>]</span>
-        </a>
+        {% if p != page %} <a href="{{ base_url }}page:{{ p }}/"> {% endif %}
+          <span {% if p == page %} class='pages_current' {% else %} class='pages_list_square' {% endif %}>[</span>
+          <span {% if p == page %} class='pages_current' {% else %} class='pages_list_num' {% endif %}>{{ p }}</span>
+          <span {% if p == page %} class='pages_current' {% else %} class='pages_list_square' {% endif %}>]</span>
+        {% if p != page %} </a> {% endif %}
       </li>
     {% endfor %}
     <li class='pages_list_li'>{{ thread_count }} total threads</li>

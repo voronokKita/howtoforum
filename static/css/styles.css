@@ -220,10 +220,13 @@ footer {
             .pages_list_num {
               color: olive; }
 
-              .pages_list_li:hover .pages_list_num {
-                color: #5c2e02; }
-                .pages_list_li:hover .pages_list_square {
-                  color: #145c02; }
+              .pages_current {
+                color: green; }
+
+                .pages_list_li:hover .pages_list_num {
+                  color: #5c2e02; }
+                  .pages_list_li:hover .pages_list_square {
+                    color: #145c02; }
 
 .main_form_container {
   display: flex;

@@ -15,6 +15,7 @@ $min_width: 340px;
 .pages_list_li {display: inline; color: gray;}
 .pages_list_square {color: gray;}
 .pages_list_num {color: olive;}
+.pages_current {color: green;}
 .pages_list_li:hover {
   .pages_list_num {color: rgb(92, 46, 2);}
   .pages_list_square {color: rgb(20, 92, 2);}

@@ -191,7 +191,7 @@ def board(board, page=1):
         return redirect(url_for('index')), 303
 
     return render_template("board.html",
-        nav=FOOTER, form_main=form_thread, base_url=base_url,
+        nav=FOOTER, form_main=form_thread, base_url=base_url, page=page,
         thread_count=board.thread_count, short_name=board.short,
         long_name=board.name, description=board.description,
         threads=threads_with_posts, pages=pages_total,
