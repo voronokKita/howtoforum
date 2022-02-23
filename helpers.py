@@ -26,7 +26,7 @@ def make_a_post(form, board, user, thread=None):
     files = [f for f in files if f is not None]
     text = form.text.data
     if not text and not files:
-        raise EmptyPostError("error")
+        raise EmptyPostError(M_EMPTY)
 
     # 1 load files
     elif files:
@@ -66,7 +66,13 @@ def make_a_post(form, board, user, thread=None):
     elif not thread.archivated and thread.post_count >= BUMP_LIMIT:
         thread.archivated = True
 
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        raise DataAlreadyExistsError(M_INTEGRITY_ERROR)
+    except SQLAlchemyError or Exception:
+        raise BaseCriticalError(M_SQL_ALCHEMY_ERROR)
+
     return board
 
 

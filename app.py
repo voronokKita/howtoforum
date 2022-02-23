@@ -170,18 +170,8 @@ def board(board, page=1):
         form_thread = MakeThread()
         base_url = f"/board:{board.short}/"
 
-    if form_thread.validate_on_submit():  # TODO separate function
-        user = session.get('user')
-        try:
-            board = helpers.make_a_post(form_thread, board, user)
-        except EmptyPostError:
-            form_thread.submit.errors.append(M_EMPTY)
-        except IntegrityError:
-            form_thread.submit.errors.append(M_INTEGRITY_ERROR)
-            db.session.rollback()
-        except SQLAlchemyError:
-            form_thread.submit.errors.append(M_SQL_ALCHEMY_ERROR)
-            db.session.rollback()
+    if form_thread.validate_on_submit():
+        form_thread, board = form_handler(form_thread, board)
 
     try:
         pages_total, threads_with_posts = helpers.generete_board_page(page, board)
@@ -212,21 +202,11 @@ def thread(board, thread):
         form_post = MakePost()
         form_post.thread_id.data = thread.id
 
-    if form_post.validate_on_submit():  # TODO separate function
+    if form_post.validate_on_submit():
         if not form_post.thread_id.data == thread.id:
             form_post.thread_id.errors.append(M_WRONG)
         else:
-            user = session.get('user')
-            try:
-                board = helpers.make_a_post(form_post, board, user, thread)
-            except EmptyPostError:
-                form_post.submit.errors.append(M_EMPTY)
-            except IntegrityError:
-                form_post.submit.errors.append(M_INTEGRITY_ERROR)
-                db.session.rollback()
-            except SQLAlchemyError:
-                form_post.submit.errors.append(M_SQL_ALCHEMY_ERROR)
-                db.session.rollback()
+            form_post, board, thread = form_handler(form_post, board, thread)
 
     thread = helpers.generete_thread_page(thread)
 
@@ -235,6 +215,19 @@ def thread(board, thread):
         short_name=board.short, long_name=board.name, thread=thread,
         pass_max=ANON_PASSWORD_LENGTH, theme_max=DEFAULT_LENGTH, filesize=MAX_FILE_SIZE,
     ), 200
+
+
+def form_handler(form, board, thread=None):
+    user = session.get('user')
+    try:
+        board = helpers.make_a_post(form, board, user, thread)
+    except EmptyPostError as error:
+        form.submit.errors.append(error)
+    except DataAlreadyExistsError or BaseCriticalError as error:
+        form.submit.errors.append(error)
+        db.session.rollback()
+
+    return (form, board) if not thread else (form, board, thread)
 
 
 if __name__ == '__main__':
