@@ -217,6 +217,43 @@ def thread(board, thread):
     ), 200
 
 
+# TODO post view
+
+
+@app.route("/board:<board>/page:<int:page>/thread:<int:thread>/post:<int:post>", methods=['POST'])
+def moderation(board, page=1, thread=0, post=0):
+    """ thread only when inside... """
+    # 0 check user status
+    user = session.get('user')
+    if not user or user['status'] not in (STATUS_MOD, STATUS_ADMIN):
+        flash("Access not allowed.")
+        return redirect(url_for('index')), 303
+
+    # 1 check input
+    error = False
+    board = Boards.query.filter_by(short=escape(board)).first()
+    post = Posts.query.filter_by(id=escape(post)).first()
+    if not board or not post:
+        error = True
+    elif thread:
+         thread = Threads.query.filter_by(id=escape(thread)).first()
+         if not thread:
+             error = True
+    if error:
+        flash(M_WRONG)
+        return redirect(url_for('index')), 303
+    elif not thread and page <= 1:
+        page = 1
+
+    # 2 working
+    # TODO
+
+    if thread:
+        return redirect(url_for('thread', board=board, thread=thread)), 200
+    else:
+        return redirect(url_for('board', board=board, page=page)), 200
+
+
 def form_handler(form, board, thread=None):
     user = session.get('user')
     try:

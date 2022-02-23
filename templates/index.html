@@ -7,6 +7,12 @@
 
 {% block main %}
   <main id='index_main'>
+    <ul>
+      <li>TODO</li>
+      {% for message in get_flashed_messages() %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
     <figure id='index_img'>
       <img  srcset="/static/images/kei_260.jpg 260w,
                     /static/images/kei_360.jpg 360w,

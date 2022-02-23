@@ -22,7 +22,10 @@ class BaseCriticalError(Exception): pass
 CWD = pathlib.Path.cwd()
 FILE_STORAGE = CWD / "static" / "data"
 
-USER_STATUSES = ["user", "moderator", "administrator"]
+STATUS_USER = "user"
+STATUS_MOD = "moderator"
+STATUS_ADMIN = "administrator"
+USER_STATUSES = [STATUS_USER, STATUS_MOD, STATUS_ADMIN]
 
 FILE_TYPE_IMAGE = 'image'
 FILE_TYPE_TEXT = 'text'
