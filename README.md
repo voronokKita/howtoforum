@@ -29,7 +29,7 @@ Need in multiple forms lead me to WTForms package, that I going to learn now.
 
 #### update four
 
-<img align="right" width="100" height="100" src="ukraine.jpg">
-I wish that 24/02/22 is newer happened...<br>
+<img align="right" width="100" src="ukraine.jpg">
+I wish that 22/02/24 is newer happened...<br>
 My country invaded another free country — country of my friends, country where have I been before in my childhood, from which my father's mother from, where I wanted to go when I become a programmer and earn some money. Thousends of innosent people dying along with their cyties, millions run. This is just some endless nightmare. And there is almost nothing I can do.<br>
 I just hope that if I keep working hard, one day I will have enough resources to help other people.
