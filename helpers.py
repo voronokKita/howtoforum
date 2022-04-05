@@ -28,7 +28,7 @@ def make_a_post(form, board, user, thread=None):
 
     # 1 load files
     elif files:
-        files = load_files(files)
+        tmp_files = load_files(files)
 
     # 2 db operation:
     if op:
@@ -48,13 +48,13 @@ def make_a_post(form, board, user, thread=None):
         user = Users.query.filter_by(login=user['name']).first()
         user.posts.append(post)
 
-    if op and not files:
+    if op and not tmp_files:
         # the file by default for empty op
         file = Resources.query.filter_by(id=1).first()
         post.files.append(file)
 
-    elif files:
-        post, user = save_files(files, post, user)
+    elif tmp_files:
+        post, user = save_files(tmp_files, post, user)
 
     if op:
         board.thread_count += 1
@@ -68,7 +68,7 @@ def make_a_post(form, board, user, thread=None):
         db.session.commit()
     except IntegrityError:
         raise DataAlreadyExistsError(M_INTEGRITY_ERROR)
-    except SQLAlchemyError or Exception:
+    except SQLAlchemyError or Exception:  #TODO
         raise BaseCriticalError(M_SQL_ALCHEMY_ERROR)
 
     return board
@@ -94,8 +94,8 @@ def load_files(files):
     return tmp_files
 
 
-def save_files(files, post, user):
-    for file in files:
+def save_files(tmp_files, post, user):
+    for file in tmp_files:
         tmp_file_location = file['tmp']
         file = file['file']
 
@@ -117,7 +117,7 @@ def save_files(files, post, user):
             duplicate = Resources.query.filter_by(resource=filename).first()
             if duplicate:
                 extension = pathlib.Path(filename).suffix
-                filename = ''.join(random.choices(string.ascii_letters + string.digits, k=15))
+                filename = ''.join( random.choices( string.ascii_letters + string.digits, k=random.randint(6, 20) ) )
                 filename += extension
             else:
                 break
@@ -198,25 +198,25 @@ def fill_board(threads_on_page):
 
 
 def generete_thread_page(thread):
+    posts = [fill_post(post) for post in thread.posts]
+
     thread = {'post_count': thread.post_count, 'archivated': thread.archivated,
-              'posts': thread.posts, 'id': thread.id}
-    new_list = []
-    for post in thread['posts']:
-        username = post.get_user.login if post.user_id else None
-        theme = Markup(post.theme) if post.theme else None
-
-        files = []
-        if post.has_files:
-            for file in post.files:
-                path = f"/static/data/{file.get_type.type}/"
-                files.append({'name': file.resource, 'path': path})
-
-        p = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
-             'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
-        new_list.append(p)
-
-    thread['posts'] = new_list
+              'posts': posts, 'id': thread.id}
     return thread
+
+
+def fill_post(post):
+    username = post.get_user.login if post.user_id else None
+    theme = Markup(post.theme) if post.theme else None
+
+    files = []
+    if post.has_files:
+        for file in post.files:
+            path = f"/static/data/{file.get_type.type}/"
+            files.append({'name': file.resource, 'path': path})
+
+    return {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
+            'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
 
 
 def fill_the_database():
