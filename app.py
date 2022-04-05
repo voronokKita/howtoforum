@@ -284,33 +284,38 @@ def moderation(board, page=1, thread=0, post=0):
     """
 
 
-def form_delete_handler(form_delete):
+def form_delete_handler(form_delete):  # TODO
+    errors = []
+    if session.get('user'):
+        user = Users.query.filter_by(login=session.get('user')).first()
+    else:
+        user = None
+
     data = form_delete.posts.data
     datas = [p.strip() for p in data.split(',') if p.strip()]
+    if not datas:
+        errors.append(M_WRONG)
 
     numbers = []
     for data in datas:
         try:
             numbers.append(int(data))
-        except TypeError:
+        except:
+            errors.append(f"{M_WRONG} {data}")
             continue
 
     posts = []
     for num in numbers:
-        post = Posts.query.filter_by(id=num)
+        post = Posts.query.filter_by(id=num).first()
         if post:
             posts.append(post)
+        else:
+            errors.append(f"{M_WRONG} {num}")
 
-    if not posts:
-        # error
-        pass
+    for post in posts:
+        print(f"DELETED {post.id}")  # TODO
 
-    for posts in posts:
-        # what is user?
-        # what is password?
-        # is it a thread?
-        pass
-
+    form_delete.submit.errors = errors
     return form_delete
 
 
