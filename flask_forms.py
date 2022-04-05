@@ -70,3 +70,9 @@ class MakeThread(FlaskForm):
 
 class MakePost(MakeThread):
     thread_id = HiddenField("Thread", [DataRequired(message=M_WRONG)])
+
+
+class DeletePosts(FlaskForm):
+    posts = StringField("Posts", [DataRequired(message=M_EMPTY)])
+    password = PasswordField("Password", [Length(max=ANON_PASSWORD_LENGTH, message=M_POST_PASSWORD_LEN)])
+    submit = SubmitField()

@@ -250,7 +250,7 @@ def fill_the_database():
         statuses = Statuses.query.all()
         for user in BASE_USERS:
             u = Users(login=user['name'], password=hash_password("qwerty", user['name']), \
-                    get_status=statuses[ user['status'] ])
+                      get_status=statuses[ user['status'] ])
             l.append(u)
         db.session.add_all(l)
         db.session.commit()
@@ -320,7 +320,7 @@ def fill_the_database():
         users = Users.query.all()
         for post in HELLO_THREAD:
             has_files = True if post['files'] else False
-            user = users[ post['user'] ] if post['user'] else None
+            user = None if post['user'] is None else users[ post['user'] ]
             new_post = Posts(get_thread=thread, get_user=user, \
                         theme=post['theme'], text=post['text'], has_files=has_files)
             db.session.add(new_post)

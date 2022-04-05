@@ -2,7 +2,7 @@ from flask import url_for, request, session, redirect, render_template, flash
 
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
-from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
+from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread, DeletePosts
 from constants import *
 import helpers
 
@@ -164,12 +164,21 @@ def board(board, page=1):
         return redirect(url_for('index')), 303
     elif page <= 0:
         return redirect(url_for('board', board=board.short, page=1)), 303
-    else:
-        form_thread = MakeThread()
-        base_url = f"/board:{board.short}/"
 
-    if form_thread.validate_on_submit():
-        form_thread, board = form_handler(form_thread, board)
+    form_thread = MakeThread()
+    form_delete = DeletePosts()
+    base_url = f"/board:{board.short}/"
+
+    delete_post = False
+    if form_delete.validate_on_submit():
+        form_delete = form_delete_handler(form_delete)
+        delete_post = True
+    else:
+        form_delete.posts.errors = []
+
+    if not delete_post:
+        if form_thread.validate_on_submit():
+            form_thread, board = posting_form_handler(form_thread, board)
 
     try:
         pages_total, threads_with_posts = helpers.generete_board_page(page, board)
@@ -179,7 +188,7 @@ def board(board, page=1):
         return redirect(url_for('index')), 303
 
     return render_template("board.html",
-        nav=FOOTER, form_main=form_thread, base_url=base_url, page=page,
+        nav=FOOTER, form_main=form_thread, form_delete=form_delete, base_url=base_url, page=page,
         thread_count=board.thread_count, short_name=board.short,
         long_name=board.name, description=board.description,
         threads=threads_with_posts, pages=pages_total,
@@ -204,7 +213,7 @@ def thread(board, thread):
         if not form_post.thread_id.data == thread.id:
             form_post.thread_id.errors.append(M_WRONG)
         else:
-            form_post, board, thread = form_handler(form_post, board, thread)
+            form_post, board, thread = posting_form_handler(form_post, board, thread)
 
     thread = helpers.generete_thread_page(thread)
 
@@ -236,10 +245,13 @@ def post(board, thread, post):
     ), 200
 
 
-@app.route("/board:<board>/page:<int:page>/thread:<int:thread>/post:<int:post>", methods=['POST'])
+@app.route("/delete", methods=['POST'])
+def delete_posts():
+    return "OK"
+
+
+"""
 def moderation(board, page=1, thread=0, post=0):
-    """ thread only when inside... """
-    # 0 check user status
     user = session.get('user')
     if not user or user['status'] not in (STATUS_MOD, STATUS_ADMIN):
         flash("Access not allowed.")
@@ -264,13 +276,45 @@ def moderation(board, page=1, thread=0, post=0):
     # 2 working
     # TODO
 
+
     if thread:
         return redirect(url_for('thread', board=board, thread=thread)), 200
     else:
         return redirect(url_for('board', board=board, page=page)), 200
+    """
 
 
-def form_handler(form, board, thread=None):
+def form_delete_handler(form_delete):
+    data = form_delete.posts.data
+    datas = [p.strip() for p in data.split(',') if p.strip()]
+
+    numbers = []
+    for data in datas:
+        try:
+            numbers.append(int(data))
+        except TypeError:
+            continue
+
+    posts = []
+    for num in numbers:
+        post = Posts.query.filter_by(id=num)
+        if post:
+            posts.append(post)
+
+    if not posts:
+        # error
+        pass
+
+    for posts in posts:
+        # what is user?
+        # what is password?
+        # is it a thread?
+        pass
+
+    return form_delete
+
+
+def posting_form_handler(form, board, thread=None):
     user = session.get('user')
     try:
         board = helpers.make_a_post(form, board, user, thread)
