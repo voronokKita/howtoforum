@@ -1,0 +1,52 @@
+{% extends "/layouts/layout.html" %}
+
+{% block title %}post #{{ post.id }}{% endblock %}
+
+{% block header %}{{ board_long_name | capitalize }}{% endblock %}
+{% block description %}thread №{{ thread }}<br>post #{{ post.id }}{% endblock %}
+
+{% block main %}
+  <main class='boards_main'>
+
+    <div class='boards_container'>
+
+      <section class='thread_section'>
+
+        <article class='post'>
+
+          <div class='post_header'>
+            <h6 class='post_theme'>{% if post.theme %}{{ post.theme }}{% endif %}</h6>
+            <span class='post_author'>{% if post.author %}{{ post.author }}{% else %}Anonymous{% endif %}</span>
+            <span class='post_date'>{{ post.date }}</span>
+            <span class='post_id'>#{{ post.id }}</span>
+          </div>
+
+          <div class='post_content'>
+
+            <div class='post_files_container'>
+              <aside class='post_files_list'>
+                {% for file in post.files %}
+                  <figure class='post_file_container'>
+                    <div class='post_file_img'><img src="{{ file.path }}{{ file.name }}"></div>
+                    <figcaption class='post_file_name'>{{ file.name }}</figcaption>
+                  </figure>
+                {% endfor %}
+              </aside>
+            </div>
+
+            <p class='post_text'>{{ post.text }}</p>
+
+          </div>
+
+        </article>
+
+      </section>
+
+    </div>
+
+  </main>
+{% endblock %}
+
+{% block footer %}
+  {% include "/layouts/footer.html" %}
+{% endblock %}

@@ -1,9 +1,6 @@
 from flask import Flask
-
 from flask_session import Session
-
 from flask_wtf.csrf import CSRFProtect
-
 from flask_assets import Environment, Bundle
 
 from constants import *

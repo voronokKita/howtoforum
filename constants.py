@@ -11,6 +11,7 @@ from time import sleep
 
 from markupsafe import Markup, escape
 from werkzeug.utils import secure_filename
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 
 class PageOutOfRangeError(Exception): pass
@@ -57,7 +58,6 @@ MAX_FILE_SIZE = 30
 USERNAME_PATTERN = '[A-Za-z0-9_-]+'
 TIME_FORMAT = '%A, %-d day of %B %Y | %-H:%M:%S'
 ANOTHER_TEXT_TYPES = ["json", "javascript", "pdf", "xml", "msword"]
-FOOTER = []
 
 M_WRONG = "Wrong input."
 M_EMPTY = "Empty input."
@@ -69,6 +69,7 @@ M_POST_PASSWORD_LEN = f"Password is {ANON_PASSWORD_LENGTH} symbols max."
 M_INTEGRITY_ERROR = "ERROR: data already exists."
 M_SQL_ALCHEMY_ERROR = "ERROR: something went terrible wrong..."
 
+FOOTER = []
 GLOBAL_SALT = """So, with sadness in my heart
 Feel the best thing I could do
 Is end it all and leave forever
@@ -77,8 +78,14 @@ What once was happy now is sad
 I'll never love again
 My world is ending..."""
 
-BASE_USERS = [{'name': "senpai", 'status': 2}, {'name': "maika", 'status': 1}, {'name': "megumin", 'status': 1},
-              {'name': "aoba", 'status': 0}, {'name': "nene", 'status': 0}]
+# db preset:
+BASE_USERS = [
+    {'name': "senpai", 'status': 2},
+    {'name': "maika", 'status': 1},
+    {'name': "megumin", 'status': 1},
+    {'name': "aoba", 'status': 0},
+    {'name': "nene", 'status': 0}
+]
 BASE_RESOURCES = [
     {'file': "0000000000.jpg", 'user': None},
     {'file': "0000000001.png", 'user': 0},
@@ -91,19 +98,46 @@ BASE_RESOURCES = [
     {'file': "0000000008.png", 'user': None}
 ]
 HELLO_THREAD = [
-    {'user': BASE_RESOURCES[1]['user'], 'theme': "Hello!",
-     'text': "Kon'nichiwa!", 'files': [ BASE_RESOURCES[1]['file'] ]},
-    {'user': None, 'theme': None, 'text': "First one!", 'files': False},
-    {'user': None, 'theme': None, 'text': "I'm the strongest!", 'files': False},
-    {'user': BASE_RESOURCES[2]['user'], 'theme': None,
-     'text': "I hope you all will behave like a good boys and girls.",
-     'files': [ BASE_RESOURCES[2]['file'] ]},
-    {'user': BASE_RESOURCES[3]['user'], 'theme': None,
-     'text': "I wish I could become a programmer and create my own forum too.",
-     'files': [ BASE_RESOURCES[3]['file'] ]},
-    {'user': BASE_RESOURCES[4]['user'], 'theme': None,
-     'text': "You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!",
-     'files': [ BASE_RESOURCES[4]['file'] ]},
-    {'user': BASE_RESOURCES[5]['user'], 'theme': None, 'text': "I love you all so much!",
-     'files': [ BASE_RESOURCES[5]['file'], BASE_RESOURCES[6]['file'], BASE_RESOURCES[7]['file'] ]},
+    {
+        'user': BASE_RESOURCES[1]['user'],
+        'theme': "Hello!",
+        'text': "Kon'nichiwa!",
+        'files': [ BASE_RESOURCES[1]['file'] ]
+    },
+    {
+        'user': None,
+        'theme': None,
+        'text': "First one!",
+        'files': False
+    },
+    {
+        'user': None,
+        'theme': None,
+        'text': "I'm the strongest!",
+        'files': False
+    },
+    {
+        'user': BASE_RESOURCES[2]['user'],
+        'theme': None,
+        'text': "I hope you all will behave like a good boys and girls.",
+        'files': [ BASE_RESOURCES[2]['file'] ]
+    },
+    {
+        'user': BASE_RESOURCES[3]['user'],
+        'theme': None,
+        'text': "I wish I could become a programmer and create my own forum too.",
+        'files': [ BASE_RESOURCES[3]['file'] ]
+    },
+    {
+        'user': BASE_RESOURCES[4]['user'],
+        'theme': None,
+        'text': "You just have to learn something new and practice regularly, and one day you'll definitely become one. Programming is fun!",
+        'files': [ BASE_RESOURCES[4]['file'] ]
+    },
+    {
+        'user': BASE_RESOURCES[5]['user'],
+        'theme': None,
+        'text': "I love you all so much!",
+        'files': [ BASE_RESOURCES[5]['file'], BASE_RESOURCES[6]['file'], BASE_RESOURCES[7]['file'] ]
+    },
 ]

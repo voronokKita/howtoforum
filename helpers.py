@@ -1,7 +1,5 @@
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 
-from sqlalchemy.exc import IntegrityError
-
 from constants import *
 
 

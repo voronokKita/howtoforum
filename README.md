@@ -26,3 +26,11 @@ I learned and clarified the things I wanted to. Now I'll just write a working fo
 
 There's so much depth in sites development, even the simplest thing can be a rabbit hole to endless variants of implementation and new fields of knowledge.<br>
 Need in multiple forms lead me to WTForms package, that I going to learn now.
+
+#### update four
+
+I wish that 24/02/22 is newer happened...<br>
+My country invaded another free country — country of my friends, country where have I been before in my childhood, from which my father's mother from, where I wanted to go when I become a programmer and earn some money. Thousends of innosent people dying along with their cyties, millions run. This is just some endless nightmare. And there is almost nothing I can do.<br>
+I just hope that if I keep working hard, one day I will have enough resources to help other people.
+
+![picture](ukraine.jpg "Ukraine")

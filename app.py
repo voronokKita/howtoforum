@@ -1,7 +1,5 @@
 from flask import url_for, request, session, redirect, render_template, flash
 
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
-
 from flask_config import app
 from database import db, Statuses, Resource_types, Boards, Threads, Users, Posts, Resources
 from flask_forms import LoginForm, AnonymizeForm, ChangePassword, RegisterForm, MakePost, MakeThread
@@ -217,7 +215,34 @@ def thread(board, thread):
     ), 200
 
 
-# TODO post view
+@app.route("/board:<board>/thread:<int:thread>/post:<int:post>", methods=['GET'])
+def post(board, thread, post):
+    board = Boards.query.filter_by(short=escape(board)).first()  #?
+    thread = Threads.query.filter_by(id=escape(thread)).first()  #?
+    post = Posts.query.filter(Posts.thread_id == thread.id, Posts.id == escape(post)).first()
+    if not board:
+        return redirect(url_for('index')), 303
+    elif not thread:
+        return redirect(url_for('board', board=board.short, page=1)), 303
+    elif not post:
+        return redirect(url_for('thread', board=board.short, thread=thread.id))
+    else:
+        base_url = f"/board:{board.short}/thread:{thread.id}/post:{post.id}"
+
+    username = post.get_user.login if post.user_id else None
+    theme = Markup(post.theme) if post.theme else None
+    files = []
+    if post.has_files:
+        for file in post.files:
+            path = f"/static/data/{file.get_type.type}/"
+            files.append({'name': file.resource, 'path': path})
+
+    post = {'id': post.id, 'date': post.date.strftime(TIME_FORMAT),
+            'author': username, 'theme': theme, 'text': Markup(post.text), 'files': files}
+
+    return render_template("post.html",
+        nav=FOOTER, base_url=base_url, board_long_name=board.name, thread=thread.id, post=post
+    ), 200
 
 
 @app.route("/board:<board>/page:<int:page>/thread:<int:thread>/post:<int:post>", methods=['POST'])
