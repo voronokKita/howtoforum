@@ -146,9 +146,9 @@ def delete_a_post(post, user, password):
             will_be_deleted = True
             print("OKOK")
         else:
-            # check hierarchy: anon = 0, user = 1, mod = 2, admin = 3
-            poster_status = post.get_user.status if post.user_id else 0
-            if user.status >= 2 and poster_status < user.status:
+            # check hierarchy
+            poster_status = post.get_user.status if post.user_id else USER_STATUSES[STATUS_ANON]
+            if user.status > USER_STATUSES[STATUS_USER] and poster_status < user.status:
                 will_be_deleted = True
                 print("OKOK")
             else:
@@ -249,7 +249,7 @@ def fill_the_database():
     db.create_all()
     if not Statuses.query.first():
         l = []
-        for status in USER_STATUSES:
+        for status in USER_STATUSES[1:]:
             s = Statuses(status=status)
             l.append(s)
         db.session.add_all(l)
