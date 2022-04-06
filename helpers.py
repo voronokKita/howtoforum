@@ -134,28 +134,41 @@ def save_files(tmp_files, post, user):
 
 def delete_a_post(post, user, password):
     will_be_deleted = False
-    if password:
-        if post.password == password:
-            will_be_deleted = True
-            print("OKOK")
+    message = ""
+    if password and not post.user_id:
+        if post.password != password:
+            message = M_PASSWORD_WRONG
         else:
-            print("wrong password error")
+            will_be_deleted = True
 
     elif user:
         if post.user_id and post.get_user.login == user.login:
             will_be_deleted = True
-            print("OKOK")
         else:
-            # check hierarchy
+            # check moderation hierarchy
             poster_status = post.get_user.status if post.user_id else USER_STATUSES[STATUS_ANON]
             if user.status > USER_STATUSES[STATUS_USER] and poster_status < user.status:
                 will_be_deleted = True
-                print("OKOK")
-            else:
-                print("don't have permissions")
 
+    post_id = post.id
     if will_be_deleted:
-        pass
+        if not post.op:
+            db.session.delete(post)
+        else:
+            thread = post.get_thread
+            for post in thread.posts:
+                db.session.delete(post)
+            db.session.delete(thread)
+        try:
+            db.session.commit()
+        except SQLAlchemyError or Exception:  #TODO
+            message = f"{M_SQL_ALCHEMY_ERROR} #{post_id}"
+        else:
+            message = f"Deleted successfully: #{post_id}"
+    else:
+        message = f"Don't have permissions: #{post_id}"
+
+    return message
 
 
 def generete_board_page(page, board):

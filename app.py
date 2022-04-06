@@ -292,22 +292,22 @@ def form_delete_handler(form_delete):  # TODO
     else:
         password = helpers.hash_password(form_delete.password.data) if form_delete.password.data else None
 
-    errors = []
+    messages = []
     if not user and not password:
-        errors.append(f"{M_EMPTY} Password.")
+        messages.append(f"{M_EMPTY} Password.")
 
     else:
         data = form_delete.posts.data
         datas = [p.strip() for p in data.split(',') if p.strip()]
         if not datas:
-            errors.append(M_WRONG)
+            messages.append(M_WRONG)
 
         numbers = []
         for data in datas:
             try:
                 num = int(data)
             except:
-                errors.append(f"{M_WRONG} {data}")
+                messages.append(f"{M_WRONG} {data}")
             else:
                 if num not in numbers:
                     numbers.append(num)
@@ -318,12 +318,13 @@ def form_delete_handler(form_delete):  # TODO
             if post:
                 posts.append(post)
             else:
-                errors.append(f"{M_WRONG} {num}")
+                messages.append(f"{M_WRONG} {num}")
 
         for post in posts:
-            helpers.delete_a_post(post, user, password)
+            message = helpers.delete_a_post(post, user, password)
+            messages.append(message)
 
-    form_delete.submit.errors = errors
+    form_delete.submit.errors = messages
     return form_delete
 
 
