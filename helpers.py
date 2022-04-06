@@ -40,7 +40,7 @@ def make_a_post(form, board, user, thread=None):
     password = hash_password(form.password.data) if not user and form.password.data else None
     theme = escape(form.theme.data) if form.theme.data and len(form.theme.data) <= DEFAULT_LENGTH else None
 
-    post = Posts(get_thread=thread, password=password, date=date, \
+    post = Posts(get_thread=thread, op=op, password=password, date=date, \
             theme=theme, text=escape(form.text.data), has_files=True)
     db.session.add(post)
 
@@ -303,7 +303,7 @@ def fill_the_database():
                 print(f"db: /{board.short}/{t}")
                 new_thread = Threads(get_board=board)
                 db.session.add(new_thread)
-                op = Posts(get_thread=new_thread, theme="test", text="Just a test thread.", has_files=True)
+                op = Posts(get_thread=new_thread, op=True, theme="test", text="Just a test thread.", has_files=True)
                 db.session.add(op)
                 file = Resources.query.filter_by(id=1).first()
                 op.files.append(file)
@@ -321,7 +321,7 @@ def fill_the_database():
         boards[0].thread_count += 1
         db.session.commit()
         thread = Threads.query.order_by(Threads.id.desc()).first()
-        op = Posts(get_thread=thread, theme="To The Bump Limit!", \
+        op = Posts(get_thread=thread, op=True, theme="To The Bump Limit!", \
                 text="This thread is going to reach the bump limit!", has_files=True)
         file = Resources.query.filter_by(id=9).first()
         op.files.append(file)
@@ -344,10 +344,11 @@ def fill_the_database():
         db.session.commit()
         thread = Threads.query.order_by(Threads.id.desc()).first()
         users = Users.query.all()
-        for post in HELLO_THREAD:
+        for i, post in enumerate(HELLO_THREAD):
             has_files = True if post['files'] else False
             user = None if post['user'] is None else users[ post['user'] ]
-            new_post = Posts(get_thread=thread, get_user=user, \
+            op = True if i == 0 else False
+            new_post = Posts(get_thread=thread, op=op, get_user=user, \
                         theme=post['theme'], text=post['text'], has_files=has_files)
             db.session.add(new_post)
             if has_files:

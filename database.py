@@ -10,13 +10,14 @@ app.config.update(
 )
 db = SQLAlchemy(app)
 """
-statuses, users, resources,
+statuses, users, resources, boards,
 resource_types, threads, posts, attachments
 
 statuses    -- one-to-many -<   users
 users       -- one-to-many -<   posts
 users       -- one-to-many -<   resources
 resource_types one-to-many -<   resources
+boards      -- one-to-many -<   threads
 threads     -- one-to-many -<   posts
 posts       >- attachments -<   resources
 """
@@ -107,6 +108,7 @@ class Posts(db.Model):
     thread_id = db.Column(db.Integer, \
                 db.ForeignKey(Threads.id, onupdate='CASCADE', ondelete='RESTRICT'), \
                 index=True, nullable=False)
+    op = db.Column(db.Boolean, default=False, nullable=False)
     user_id = db.Column(db.Integer, \
                 db.ForeignKey(Users.id, onupdate='CASCADE', ondelete='SET NULL'), \
                 default=None)
