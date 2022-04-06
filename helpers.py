@@ -20,15 +20,15 @@ def make_a_post(form, board, user, thread=None):
     date = datetime.datetime.now()
 
     # 0 understand post content
-    files = [form.file1.data, form.file2.data, form.file3.data]
-    files = [f for f in files if f is not None]
+    tmp_files = [form.file1.data, form.file2.data, form.file3.data]
+    tmp_files = [f for f in tmp_files if f is not None]
     text = form.text.data
-    if not text and not files:
+    if not text and not tmp_files:
         raise EmptyPostError(M_EMPTY)
 
     # 1 load files
-    elif files:
-        tmp_files = load_files(files)
+    elif tmp_files:
+        tmp_files = load_files(tmp_files)
 
     # 2 db operation:
     if op:
@@ -130,6 +130,32 @@ def save_files(tmp_files, post, user):
         tmp_file_location.rename(FILE_STORAGE / resource_type.type / file.resource)
 
     return post, user
+
+
+def delete_a_post(post, user, password):
+    will_be_deleted = False
+    if password:
+        if post.password == password:
+            will_be_deleted = True
+            print("OKOK")
+        else:
+            print("wrong password error")
+
+    elif user:
+        if post.user_id and post.get_user.login == user.login:
+            will_be_deleted = True
+            print("OKOK")
+        else:
+            # check hierarchy: anon = 0, user = 1, mod = 2, admin = 3
+            poster_status = post.get_user.status if post.user_id else 0
+            if user.status >= 2 and poster_status < user.status:
+                will_be_deleted = True
+                print("OKOK")
+            else:
+                print("don't have permissions")
+
+    if will_be_deleted:
+        pass
 
 
 def generete_board_page(page, board):

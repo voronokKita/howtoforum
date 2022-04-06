@@ -23,10 +23,12 @@ class BaseCriticalError(Exception): pass
 CWD = pathlib.Path.cwd()
 FILE_STORAGE = CWD / "static" / "data"
 
+""" A moderator can delete posts of anonymous and users. An administrator can delete posts of moderators and below. """
 STATUS_USER = "user"
 STATUS_MOD = "moderator"
 STATUS_ADMIN = "administrator"
 USER_STATUSES = [STATUS_USER, STATUS_MOD, STATUS_ADMIN]
+USER_STATUSES_NUM = [0, 1, 2, 3]  # TODO
 
 FILE_TYPE_IMAGE = 'image'
 FILE_TYPE_TEXT = 'text'

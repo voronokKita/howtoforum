@@ -285,35 +285,43 @@ def moderation(board, page=1, thread=0, post=0):
 
 
 def form_delete_handler(form_delete):  # TODO
-    errors = []
-    if session.get('user'):
-        user = Users.query.filter_by(login=session.get('user')).first()
+    user = session.get('user')
+    user = Users.query.filter_by(login=user['name']).first() if user else None
+    if user:
+        password = None
     else:
-        user = None
+        password = helpers.hash_password(form_delete.password.data) if form_delete.password.data else None
 
-    data = form_delete.posts.data
-    datas = [p.strip() for p in data.split(',') if p.strip()]
-    if not datas:
-        errors.append(M_WRONG)
+    errors = []
+    if not user and not password:
+        errors.append(f"{M_EMPTY} Password.")
 
-    numbers = []
-    for data in datas:
-        try:
-            numbers.append(int(data))
-        except:
-            errors.append(f"{M_WRONG} {data}")
-            continue
+    else:
+        data = form_delete.posts.data
+        datas = [p.strip() for p in data.split(',') if p.strip()]
+        if not datas:
+            errors.append(M_WRONG)
 
-    posts = []
-    for num in numbers:
-        post = Posts.query.filter_by(id=num).first()
-        if post:
-            posts.append(post)
-        else:
-            errors.append(f"{M_WRONG} {num}")
+        numbers = []
+        for data in datas:
+            try:
+                num = int(data)
+            except:
+                errors.append(f"{M_WRONG} {data}")
+            else:
+                if num not in numbers:
+                    numbers.append(num)
 
-    for post in posts:
-        print(f"DELETED {post.id}")  # TODO
+        posts = []
+        for num in numbers:
+            post = Posts.query.filter_by(id=num).first()
+            if post:
+                posts.append(post)
+            else:
+                errors.append(f"{M_WRONG} {num}")
+
+        for post in posts:
+            helpers.delete_a_post(post, user, password)
 
     form_delete.submit.errors = errors
     return form_delete
