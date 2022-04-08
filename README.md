@@ -33,3 +33,8 @@ Need in multiple forms lead me to WTForms package, that I going to learn now.
 I wish that 22/02/24 is newer happened...<br>
 My country invaded another free country — country of my friends, country where have I been before in my childhood, from which my father's mother from, where I wanted to go when I become a programmer and earn some money. Thousends of innosent people dying along with their cyties, millions run. This is just some endless nightmare. And there is almost nothing I can do.<br>
 I just hope that if I keep working hard, one day I will have enough resources to help other people.
+
+#### finale
+
+I think I'm done with this project. There is much more that I want to do: in design and usability. But there is nothing that I can not do, so I don't learn something new from it. The site is fully working and I could expand and refactor it just eternally. So I think it's good time to stop and learn something new.<br>
+It turns out that I really need to learn and practice OOP. Because I often feel that I can make things much better by implementing them in from of objects. Like, the posts and threads in this case.

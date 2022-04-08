@@ -10,11 +10,14 @@ import helpers
 # TODO: pep8
 # TODO: color theme
 # TODO: style posts width
+# TODO: flash notifications
+# TODO: pictures
+# TODO: posts width
 
 
 @app.before_first_request
 def before_first_request():
-    helpers.fill_the_database()
+    #helpers.fill_the_database()
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
 
@@ -145,9 +148,7 @@ def register():
             code = 400
         else:
             session['user'] = {'name': user.login, 'status': user.get_status.status}
-            flash(f"Hello, {user.login}!")
-            form = None
-            code = 200
+            return redirect(url_for('index')), 303
 
     return render_template("register.html",
         nav=FOOTER, form=form, usr_pattern=USERNAME_PATTERN,
@@ -245,46 +246,7 @@ def post(board, thread, post):
     ), 200
 
 
-@app.route("/delete", methods=['POST'])
-def delete_posts():
-    return "OK"
-
-
-"""
-def moderation(board, page=1, thread=0, post=0):
-    user = session.get('user')
-    if not user or user['status'] not in (STATUS_MOD, STATUS_ADMIN):
-        flash("Access not allowed.")
-        return redirect(url_for('index')), 303
-
-    # 1 check input
-    error = False
-    board = Boards.query.filter_by(short=escape(board)).first()
-    post = Posts.query.filter_by(id=escape(post)).first()
-    if not board or not post:
-        error = True
-    elif thread:
-         thread = Threads.query.filter_by(id=escape(thread)).first()
-         if not thread:
-             error = True
-    if error:
-        flash(M_WRONG)
-        return redirect(url_for('index')), 303
-    elif not thread and page <= 1:
-        page = 1
-
-    # 2 working
-    # TODO
-
-
-    if thread:
-        return redirect(url_for('thread', board=board, thread=thread)), 200
-    else:
-        return redirect(url_for('board', board=board, page=page)), 200
-    """
-
-
-def form_delete_handler(form_delete):  # TODO
+def form_delete_handler(form_delete):
     user = session.get('user')
     user = Users.query.filter_by(login=user['name']).first() if user else None
     if user:

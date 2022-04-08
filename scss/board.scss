@@ -1,5 +1,3 @@
-// TODO refactor all sizes
-
 $min_width: 340px;
 
 .boards_main {min-width: $min_width;}
@@ -28,8 +26,6 @@ $min_width: 340px;
   flex-flow: column nowrap;
   align-items: center;
   margin: 14px 0 20px 0;
-
-  //border: 1px solid red;
 }
 .main_form {
   width: 60%;
@@ -81,16 +77,9 @@ $min_width: 340px;
   border-radius: 1%;
   font-size: 15px;
 }
-.form_help {
-  margin: 8px 0;
-  font-size: 10px;
-}
-.form_help * {
-  line-height: 1;
-}
-.form_help_h * {
-  font-size: 14px;
-}
+.form_help {margin: 8px 0; font-size: 10px;}
+.form_help * {line-height: 1;}
+.form_help_h * {font-size: 14px;}
 .form_help_t {
   margin-left: 11px;
   list-style: circle;
@@ -101,9 +90,28 @@ $min_width: 340px;
   font-size: 14px;
   color: red;
 }
-.password_hidden {
-  display: none;
-}
+.password_hidden {display: none;}
+
+//  <delete a pos form>
+    #delete_post_fields * {display: inline;}
+    #delete_post_input {width: 200px;}
+    #delete_post_password {width: 150px;}
+    #delete_post_input, #delete_post_password {
+      padding: 1px;
+      padding-left: 2px;
+      margin-right: 2px;
+    }
+    #delete_post_submit {
+      background-color: rgb(228, 241, 167);
+      border: 1px solid rgb(205, 221, 136);
+      color:darkorange;
+    }
+    #delete_post_submit:hover {
+      border: 1px solid red;
+      background-color: rgb(228, 241, 167);
+      color: red;
+    }
+//  </delete a pos form>
 // </forms>
 
 // <thread>
@@ -169,26 +177,26 @@ $min_width: 340px;
 }
 
 //  <files>
-.post_files_container {
-  float: left;
-  margin-right: 10px;
-}
-.post_files_list {
-  display: flex;
-  flex-flow: row wrap;
-}
-.post_file_container {
-  flex: 0 0 fit-content;
-  padding: 2px;
+    .post_files_container {
+      float: left;
+      margin-right: 10px;
+    }
+    .post_files_list {
+      display: flex;
+      flex-flow: row wrap;
+    }
+    .post_file_container {
+      flex: 0 0 fit-content;
+      padding: 2px;
 
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-}
-.post_file_container * {line-height: 1; padding-bottom: 2px;}
-.post_file_name {font-size: 10px; color: rgb(97, 97, 97);}
-.post_file_name, .post_file_img {flex: 0 0 fit-content; height: fit-content;}
-.post_file_img > img {max-width: 200px; max-height: 180px;}
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+    }
+    .post_file_container * {line-height: 1; padding-bottom: 2px;}
+    .post_file_name {font-size: 10px; color: rgb(97, 97, 97);}
+    .post_file_name, .post_file_img {flex: 0 0 fit-content; height: fit-content;}
+    .post_file_img > img {max-width: 200px; max-height: 180px;}
 //  </files>
 
 .post_text {

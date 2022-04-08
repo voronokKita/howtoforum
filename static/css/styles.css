@@ -143,58 +143,62 @@ footer {
   min-width: 360px; }
 
   .login_figure {
-    border: 1px solid green; }
+    margin: 1px;
+    margin-bottom: 6px; }
 
-    .login_container {
-      width: 350px; }
+    #space {
+      margin: 10% 0; }
 
-      .login_form {
-        display: flex;
-        flex-flow: column nowrap;
-        align-items: center;
-        width: 100%; }
+      .login_container {
+        width: 350px; }
 
-        .login_input {
-          width: 100%;
-          padding: 2px;
-          margin-bottom: 6px;
-          border: 2px solid lightgreen;
-          border-radius: 3%; }
+        .login_form {
+          display: flex;
+          flex-flow: column nowrap;
+          align-items: center;
+          width: 100%; }
 
-          .login_input:focus {
-            outline: 2px solid #4bb94b; }
+          .login_input {
+            width: 100%;
+            padding: 2px;
+            margin-bottom: 6px;
+            border: 2px solid lightgreen;
+            border-radius: 3%; }
 
-            .login_submit {
-              width: 160px;
-              margin-top: 4px;
-              margin-bottom: 10px;
-              padding: 4px 0;
-              background-color: #efffab;
-              border: 1px solid #efffab;
-              border-radius: 10%;
-              color: dimgray; }
+            .login_input:focus {
+              outline: 2px solid #4bb94b; }
 
-              .login_submit:hover, .login_submit:focus {
-                background-color: #eaff8a;
-                border: 1px solid #e0fa6c;
-                color: black;
-                outline: none;
-                cursor: pointer; }
+              .login_submit {
+                width: 160px;
+                margin-top: 4px;
+                margin-bottom: 10px;
+                padding: 4px 0;
+                background-color: #efffab;
+                border: 1px solid #efffab;
+                border-radius: 10%;
+                color: dimgray; }
 
-                .login_link:hover, .login_link:focus {
-                  color: #415200; }
+                .login_submit:hover, .login_submit:focus {
+                  background-color: #eaff8a;
+                  border: 1px solid #e0fa6c;
+                  color: black;
+                  outline: none;
+                  cursor: pointer; }
 
-                  .login_list > li {
-                    margin-bottom: 6px; }
+                  .login_link:hover, .login_link:focus {
+                    color: #415200; }
 
-                    #anon_submit {
-                      background-color: #efe;
-                      color: #035200;
-                      text-decoration: underline gray; }
+                    .login_list > li {
+                      margin-bottom: 6px; }
 
-                      #anon_submit:hover, #anon_submit:focus {
-                        color: #299101;
-                        cursor: pointer; }
+                      #anon_submit {
+                        background-color: #efe;
+                        color: #035200;
+                        text-decoration: underline gray; }
+
+                        #anon_submit:hover, #anon_submit:focus {
+                          color: #299101;
+                          cursor: pointer; }
 
 .boards_main {
   min-width: 340px; }
@@ -307,111 +311,135 @@ footer {
                           .password_hidden {
                             display: none; }
 
-                            .thread_section {
-                              width: 100%;
-                              min-width: 340px;
-                              margin-bottom: 30px;
-                              border: 1px solid #41f841;
-                              border-style: none none solid none; }
+                            #delete_post_fields * {
+                              display: inline; }
 
-                              .thread_header {
-                                width: fit-content;
-                                background-color: #8d8;
-                                border: 1px solid #75ff75; }
+                              #delete_post_input {
+                                width: 200px; }
 
-                                .thread_header * {
-                                  display: inline;
-                                  width: fit-content;
-                                  padding: 0 6px 0 1px; }
+                                #delete_post_password {
+                                  width: 150px; }
 
-                                  .expand {
-                                    font-size: 15px;
-                                    color: #555;
-                                    margin-bottom: 9px;
-                                    margin-left: 10px; }
+                                  #delete_post_input, #delete_post_password {
+                                    padding: 1px;
+                                    padding-left: 2px;
+                                    margin-right: 2px; }
 
-                                    .expand > a {
-                                      font-size: 15px;
-                                      color: #3b3d61; }
+                                    #delete_post_submit {
+                                      background-color: #e4f1a7;
+                                      border: 1px solid #cddd88;
+                                      color: darkorange; }
 
-                                      .expand > a:hover {
-                                        color: #3c4194; }
+                                      #delete_post_submit:hover {
+                                        border: 1px solid red;
+                                        background-color: #e4f1a7;
+                                        color: red; }
 
-                                        .post {
-                                          overflow: hidden;
-                                          width: fit-content;
-                                          height: fit-content;
+                                        .thread_section {
+                                          width: 100%;
                                           min-width: 340px;
-                                          margin-bottom: 9px;
-                                          background-color: #daf0d6;
-                                          border-radius: 2%; }
+                                          margin-bottom: 30px;
+                                          border: 1px solid #41f841;
+                                          border-style: none none solid none; }
 
-                                          #op {
-                                            background-color: #c6eec6;
-                                            border-radius: 0 2% 2% 2%; }
+                                          .thread_header {
+                                            width: fit-content;
+                                            background-color: #8d8;
+                                            border: 1px solid #75ff75; }
 
-                                            .post_header {
+                                            .thread_header * {
+                                              display: inline;
                                               width: fit-content;
-                                              min-width: 340px;
-                                              padding: 0 6px 0 2px; }
+                                              padding: 0 6px 0 1px; }
 
-                                              .post_header * {
-                                                display: inline;
-                                                width: fit-content; }
+                                              .expand {
+                                                font-size: 15px;
+                                                color: #555;
+                                                margin-bottom: 9px;
+                                                margin-left: 10px; }
 
-                                                .post_theme {
-                                                  color: orangered; }
+                                                .expand > a {
+                                                  font-size: 15px;
+                                                  color: #3b3d61; }
 
-                                                  .post_author {
-                                                    color: green; }
+                                                  .expand > a:hover {
+                                                    color: #3c4194; }
 
-                                                    .post_date {
-                                                      font-size: 15px; }
+                                                    .post {
+                                                      overflow: hidden;
+                                                      width: fit-content;
+                                                      height: fit-content;
+                                                      min-width: 340px;
+                                                      margin-bottom: 9px;
+                                                      background-color: #daf0d6;
+                                                      border-radius: 2%; }
 
-                                                      .post_id {
-                                                        color: olive; }
+                                                      #op {
+                                                        background-color: #c6eec6;
+                                                        border-radius: 0 2% 2% 2%; }
 
-                                                        .post_content {
-                                                          width: auto;
-                                                          min-width: 340px; }
+                                                        .post_header {
+                                                          width: fit-content;
+                                                          min-width: 340px;
+                                                          padding: 0 6px 0 2px; }
 
-                                                          .post_files_container {
-                                                            float: left;
-                                                            margin-right: 10px; }
+                                                          .post_header * {
+                                                            display: inline;
+                                                            width: fit-content; }
 
-                                                            .post_files_list {
-                                                              display: flex;
-                                                              flex-flow: row wrap; }
+                                                            .post_theme {
+                                                              color: orangered; }
 
-                                                              .post_file_container {
-                                                                flex: 0 0 fit-content;
-                                                                padding: 2px;
-                                                                display: flex;
-                                                                flex-flow: column nowrap;
-                                                                align-items: center; }
+                                                              .post_author {
+                                                                color: green; }
 
-                                                                .post_file_container * {
-                                                                  line-height: 1;
-                                                                  padding-bottom: 2px; }
+                                                                .post_date {
+                                                                  font-size: 15px; }
 
-                                                                  .post_file_name {
-                                                                    font-size: 10px;
-                                                                    color: #616161; }
+                                                                  .post_id {
+                                                                    color: olive; }
 
-                                                                    .post_file_name, .post_file_img {
-                                                                      flex: 0 0 fit-content;
-                                                                      height: fit-content; }
+                                                                    .post_content {
+                                                                      width: auto;
+                                                                      min-width: 340px; }
 
-                                                                      .post_file_img > img {
-                                                                        max-width: 200px;
-                                                                        max-height: 180px; }
+                                                                      .post_files_container {
+                                                                        float: left;
+                                                                        margin-right: 10px; }
 
-                                                                        .post_text {
-                                                                          min-width: 340px;
-                                                                          padding: 4px 4px 10px 10px;
-                                                                          margin-left: 10px; }
+                                                                        .post_files_list {
+                                                                          display: flex;
+                                                                          flex-flow: row wrap; }
 
-                                                                          @media (max-width: 900px) {
-                                                                            .post_text {
-                                                                              max-width: 600px;   }
+                                                                          .post_file_container {
+                                                                            flex: 0 0 fit-content;
+                                                                            padding: 2px;
+                                                                            display: flex;
+                                                                            flex-flow: column nowrap;
+                                                                            align-items: center; }
+
+                                                                            .post_file_container * {
+                                                                              line-height: 1;
+                                                                              padding-bottom: 2px; }
+
+                                                                              .post_file_name {
+                                                                                font-size: 10px;
+                                                                                color: #616161; }
+
+                                                                                .post_file_name, .post_file_img {
+                                                                                  flex: 0 0 fit-content;
+                                                                                  height: fit-content; }
+
+                                                                                  .post_file_img > img {
+                                                                                    max-width: 200px;
+                                                                                    max-height: 180px; }
+
+                                                                                    .post_text {
+                                                                                      min-width: 340px;
+                                                                                      padding: 4px 4px 10px 10px;
+                                                                                      margin-left: 10px; }
+
+                                                                                      @media (max-width: 900px) {
+                                                                                        .post_text {
+                                                                                          max-width: 600px;   }
 }

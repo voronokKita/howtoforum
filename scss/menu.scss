@@ -6,13 +6,10 @@
   min-width: 360px;
 }
 
-.login_figure {
-  border: 1px solid green;
-}
+.login_figure {margin: 1px; margin-bottom: 6px;}
+#space {margin: 10% 0;}
 
-.login_container {
-  width: 350px;
-}
+.login_container {width: 350px;}
 .login_form {
   display: flex;
   flex-flow: column nowrap;
@@ -27,9 +24,7 @@
   border: 2px solid lightgreen;
   border-radius: 3%;
 }
-.login_input:focus {
-  outline: 2px solid rgb(75, 185, 75);
-}
+.login_input:focus {outline: 2px solid rgb(75, 185, 75);}
 .login_submit {
   width: 160px;
   margin-top: 4px;
@@ -48,12 +43,8 @@
   outline: none;
   cursor: pointer;
 }
-.login_link:hover, .login_link:focus {
-  color: rgb(65, 82, 0);
-}
-.login_list > li {
-  margin-bottom: 6px;
-}
+.login_link:hover, .login_link:focus {color: rgb(65, 82, 0);}
+.login_list > li {margin-bottom: 6px;}
 
 #anon_submit {
   background-color: rgb(238, 255, 238);

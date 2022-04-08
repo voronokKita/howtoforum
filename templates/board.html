@@ -66,24 +66,7 @@
         </section>
       {% endfor %}
 
-      <form action='{{ base_url }}' method='POST' enctype='multipart/form-data' class='?'>
-        {{ form_delete.csrf_token }}
-        <ul>
-          <li>{{ form_delete.posts(placeholder="Posts to delete: 1, 2, 3", class='?') }}</li>
-          <li {% if session['user'] %}class='password_hidden'{% endif %}>
-            {{ form_delete.password(placeholder="Password", class='?') }}
-          </li>
-          <li>{{ form_delete.submit(value="Delete", class='?') }}</li>
-
-          <div class='form_help'>
-            {% for field, errors in form_delete.errors.items() %}
-              {% for error in errors %}
-                <li class='posting_error'>{{ error }}</li>
-              {% endfor %}
-            {% endfor %}
-          </div>
-        </ul>
-      </form>
+      {% include "/layouts/delete_posts_form.html" %}
 
       {% include "/layouts/list_of_pages.html" %}
 

@@ -9,7 +9,18 @@
   <main class='login_main'>
 
     <figure class='login_figure'>
-      pic <img>
+      <img  srcset="/static/images/tea_party_260.jpg 260w,
+                    /static/images/tea_party_360.jpg 360w,
+                    /static/images/tea_party_460.jpg 460w,
+                    /static/images/tea_party_560.jpg 560w,
+                    /static/images/tea_party.jpg 660w"
+            sizes="(max-width: 360px) 260px,
+                   (max-width: 460px) 360px,
+                   (max-width: 560px) 460px,
+                   (max-width: 660px) 560px,
+                   660px"
+            src="/static/images/tea_party.jpg"
+            alt="tea party">
     </figure>
 
     <div class='login_container'>
