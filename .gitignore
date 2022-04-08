@@ -3,5 +3,3 @@
 .webassets-cache
 __pycache__
 .vscode
-forum.db
-/static/data

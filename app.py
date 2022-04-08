@@ -17,7 +17,7 @@ import helpers
 
 @app.before_first_request
 def before_first_request():
-    #helpers.fill_the_database()
+    helpers.fill_the_database()
     global FOOTER
     FOOTER = [b.short for b in Boards.query.all()]
 

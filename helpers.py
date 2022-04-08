@@ -262,7 +262,8 @@ def fill_the_database():
     db.create_all()
     if not Statuses.query.first():
         l = []
-        for status in USER_STATUSES[1:]:
+        statuses = [STATUS_USER, STATUS_MOD, STATUS_ADMIN]
+        for status in statuses:
             s = Statuses(status=status)
             l.append(s)
         db.session.add_all(l)
