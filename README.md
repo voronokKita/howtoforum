@@ -13,6 +13,8 @@ Handwritten CSS. The SQLite db works through Flask-SQLAlchemy. Flask WTForms.
 1. pipenv shell
 2. FLASK_APP=app.py FLASK_ENV=development flask run
 
+##### Demo:
+
 <img src="scr1.jpg" width="500" alt="first-page">
 
 <img src="scr2.jpg" width="500" alt="first-page">
