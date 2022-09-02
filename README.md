@@ -7,7 +7,7 @@ Handwritten CSS. The SQLite db works through Flask-SQLAlchemy. Flask WTForms.
 
 ###### Requirements: Pipenv https://pypi.org/project/pipenv/
 
-###### In the terminal:
+###### In a terminal:
 0. pipenv install
 1. pipenv shell
 2. FLASK_APP=app.py FLASK_ENV=development flask run
