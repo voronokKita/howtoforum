@@ -16,6 +16,6 @@ Handwritten CSS. The SQLite db works through Flask-SQLAlchemy. Flask WTForms.
 
 <img src="scr1.jpg" width="500" alt="first-page">
 
-<img src="scr2.jpg" width="500" alt="first-page">
+<img src="scr2.jpg" width="500" alt="second-page">
 
-<img src="scr3.jpg" width="500" alt="first-page">
+<img src="scr3.jpg" width="500" alt="third-page">
